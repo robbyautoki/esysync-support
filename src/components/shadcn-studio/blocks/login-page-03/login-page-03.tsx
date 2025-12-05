@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useSignIn, useAuth } from '@clerk/nextjs'
+import { useSignIn } from '@clerk/nextjs'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -32,22 +31,8 @@ const avatars = [
 
 const Login = () => {
   const { signIn, isLoaded } = useSignIn()
-  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth()
-
-  // Redirect to dashboard if already signed in
-  useEffect(() => {
-    if (isAuthLoaded && isSignedIn) {
-      window.location.href = '/dashboard'
-    }
-  }, [isSignedIn, isAuthLoaded])
 
   const handleGoogleLogin = async () => {
-    // If already signed in, just redirect
-    if (isSignedIn) {
-      window.location.href = '/dashboard'
-      return
-    }
-
     if (!isLoaded || !signIn) return
 
     await signIn.authenticateWithRedirect({
@@ -58,12 +43,6 @@ const Login = () => {
   }
 
   const handleFacebookLogin = async () => {
-    // If already signed in, just redirect
-    if (isSignedIn) {
-      window.location.href = '/dashboard'
-      return
-    }
-
     if (!isLoaded || !signIn) return
 
     await signIn.authenticateWithRedirect({
@@ -73,20 +52,11 @@ const Login = () => {
     })
   }
 
-  // Show loading while checking auth status
-  if (!isAuthLoaded) {
+  // Show loading while Clerk is loading
+  if (!isLoaded) {
     return (
       <div className='flex h-dvh items-center justify-center'>
         <div className='text-muted-foreground'>Laden...</div>
-      </div>
-    )
-  }
-
-  // If signed in, show loading while redirecting
-  if (isSignedIn) {
-    return (
-      <div className='flex h-dvh items-center justify-center'>
-        <div className='text-muted-foreground'>Weiterleitung zum Dashboard...</div>
       </div>
     )
   }

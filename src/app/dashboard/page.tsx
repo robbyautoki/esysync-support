@@ -1,7 +1,6 @@
 'use client'
 
 import type { ComponentType, CSSProperties } from 'react'
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/nextjs'
 
 import {
   BellIcon,
@@ -318,17 +317,6 @@ const DashboardContent = () => {
   )
 }
 
-const Dashboard = () => {
-  return (
-    <>
-      <SignedIn>
-        <DashboardContent />
-      </SignedIn>
-      <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
-    </>
-  )
+export default function Dashboard() {
+  return <DashboardContent />
 }
-
-export default Dashboard
