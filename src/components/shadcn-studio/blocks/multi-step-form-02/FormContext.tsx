@@ -80,6 +80,9 @@ export interface FormData {
   shippingAddress: string
   salutation: 'herr' | 'frau' | 'divers' | null
   contactPerson: string
+
+  // Nach erfolgreicher Erstellung
+  ticketNumber?: string
 }
 
 interface FormContextType {

@@ -1,17 +1,27 @@
-import { CheckCircleIcon, HomeIcon, PlusIcon, PhoneIcon } from 'lucide-react'
+import { CheckCircleIcon, HomeIcon, PlusIcon, PhoneIcon, CopyIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
 
 import type { StepperType } from '@/components/shadcn-studio/blocks/multi-step-form-02/MultiStepForm'
 import { useFormData } from '@/components/shadcn-studio/blocks/multi-step-form-02/FormContext'
+import { useState } from 'react'
 
 const ConfirmationStep = ({ stepper }: { stepper: StepperType }) => {
-  const { resetForm } = useFormData()
+  const { formData, resetForm } = useFormData()
+  const [copied, setCopied] = useState(false)
 
   const handleNewRequest = () => {
     resetForm()
     stepper.reset()
+  }
+
+  const copyTicketNumber = async () => {
+    if (formData.ticketNumber) {
+      await navigator.clipboard.writeText(formData.ticketNumber)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   return (
@@ -27,6 +37,28 @@ const ConfirmationStep = ({ stepper }: { stepper: StepperType }) => {
           </p>
         </div>
       </div>
+
+      {/* Ticket-Nummer */}
+      {formData.ticketNumber && (
+        <div className='rounded-lg border-2 border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30 p-6 text-center'>
+          <p className='text-sm text-muted-foreground mb-2'>Ihre Ticket-Nummer:</p>
+          <div className='flex items-center justify-center gap-2'>
+            <p className='text-2xl font-bold text-green-600 dark:text-green-400 font-mono'>
+              {formData.ticketNumber}
+            </p>
+            <Button variant='ghost' size='sm' onClick={copyTicketNumber} className='h-8 w-8 p-0'>
+              <CopyIcon className='size-4' />
+              <span className='sr-only'>Kopieren</span>
+            </Button>
+          </div>
+          {copied && (
+            <p className='text-xs text-green-600 mt-2'>Kopiert!</p>
+          )}
+          <p className='text-xs text-muted-foreground mt-3'>
+            Bitte bewahren Sie diese Nummer für Rückfragen auf.
+          </p>
+        </div>
+      )}
 
       <div className='rounded-lg border bg-muted/30 p-4 space-y-3'>
         <h3 className='font-semibold'>Wie geht es weiter?</h3>

@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SupportTicket {
+  id                       String   @id @default(cuid())
+  ticketNumber             String   @unique
+
+  // Step 1: Kategorie
+  category                 String   // hardware, software, network
+
+  // Step 2: Problem Details
+  problemDetail            String
+  hasRestarted             Boolean
+
+  // Step 3: Versand
+  shippingOption           String   // own-packaging, avantor-box, technician, complete-swap
+
+  // Step 4: Account & Gerätedaten
+  accountNumber            String
+  displayNumber            String
+  displayLocation          String
+  alternateReturnAddress   String?
+  email                    String
+  additionalDeviceAffected Boolean  @default(false)
+
+  // Step 5: Kontaktdaten
+  differentShippingAddress Boolean  @default(false)
+  shippingAddress          String?
+  salutation               String   // herr, frau, divers
+  contactPerson            String
+
+  // Metadaten
+  status                   String   @default("open") // open, in_progress, waiting_for_device, repair_in_progress, shipping_back, completed
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  // Status-Verlauf
+  statusHistory            StatusHistory[]
+}
+
+model StatusHistory {
+  id         String        @id @default(cuid())
+  ticketId   String
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  fromStatus String?
+  toStatus   String
+  comment    String?
+  createdAt  DateTime      @default(now())
+
+  @@index([ticketId])
+}
+
+// Anleitungen/Guides
+model GuideCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  order       Int      @default(0)
+  guides      Guide[]
+  createdAt   DateTime @default(now())
+}
+
+model Guide {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  excerpt     String        // Kurzbeschreibung für Übersicht
+  content     String        @db.Text // Rich-Text HTML Content
+  coverImage  String?       // URL zum Titelbild
+  categoryId  String
+  category    GuideCategory @relation(fields: [categoryId], references: [id])
+  published   Boolean       @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([categoryId])
+  @@index([published])
+}

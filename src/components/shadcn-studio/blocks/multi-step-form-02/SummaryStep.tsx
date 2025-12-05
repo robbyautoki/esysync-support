@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, SendIcon, EditIcon } from 'lucide-react'
+import { ArrowLeftIcon, SendIcon, EditIcon, Loader2Icon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
@@ -11,8 +11,10 @@ import { useFormData, problemCategories, shippingOptions } from '@/components/sh
 import { useState } from 'react'
 
 const SummaryStep = ({ stepper }: { stepper: StepperType }) => {
-  const { formData } = useFormData()
+  const { formData, updateFormData } = useFormData()
   const [confirmed, setConfirmed] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Get readable values
   const category = formData.category ? problemCategories[formData.category] : null
@@ -20,6 +22,32 @@ const SummaryStep = ({ stepper }: { stepper: StepperType }) => {
   const shipping = shippingOptions.find(o => o.id === formData.shippingOption)
 
   const salutationMap = { herr: 'Herr', frau: 'Frau', divers: 'Divers' }
+
+  const handleSubmit = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        updateFormData({ ticketNumber: result.ticket.ticketNumber })
+        stepper.next()
+      } else {
+        setError(result.error || 'Fehler beim Absenden der Anfrage')
+      }
+    } catch {
+      setError('Netzwerkfehler. Bitte versuchen Sie es erneut.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <CardContent className='col-span-5 flex flex-col gap-6 p-6 md:col-span-3'>
@@ -158,19 +186,35 @@ const SummaryStep = ({ stepper }: { stepper: StepperType }) => {
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className='rounded-lg border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30 p-4'>
+          <p className='text-sm text-red-600 dark:text-red-400'>{error}</p>
+        </div>
+      )}
+
       <div className='flex justify-between gap-4 pt-4'>
-        <Button variant='secondary' size='lg' onClick={stepper.prev}>
+        <Button variant='secondary' size='lg' onClick={stepper.prev} disabled={loading}>
           <ArrowLeftIcon className='mr-2 size-4' />
           Zurück
         </Button>
         <Button
           size='lg'
-          onClick={stepper.next}
-          disabled={!confirmed}
+          onClick={handleSubmit}
+          disabled={!confirmed || loading}
           className='bg-green-600 hover:bg-green-700'
         >
-          <SendIcon className='mr-2 size-4' />
-          Anfrage absenden
+          {loading ? (
+            <>
+              <Loader2Icon className='mr-2 size-4 animate-spin' />
+              Wird gesendet...
+            </>
+          ) : (
+            <>
+              <SendIcon className='mr-2 size-4' />
+              Anfrage absenden
+            </>
+          )}
         </Button>
       </div>
     </CardContent>
