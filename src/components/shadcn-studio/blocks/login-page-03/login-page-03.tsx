@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import { useSignIn, useAuth } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -34,19 +33,18 @@ const avatars = [
 const Login = () => {
   const { signIn, isLoaded } = useSignIn()
   const { isSignedIn, isLoaded: isAuthLoaded } = useAuth()
-  const router = useRouter()
 
   // Redirect to dashboard if already signed in
   useEffect(() => {
     if (isAuthLoaded && isSignedIn) {
-      router.replace('/dashboard')
+      window.location.href = '/dashboard'
     }
-  }, [isSignedIn, isAuthLoaded, router])
+  }, [isSignedIn, isAuthLoaded])
 
   const handleGoogleLogin = async () => {
     // If already signed in, just redirect
     if (isSignedIn) {
-      router.replace('/dashboard')
+      window.location.href = '/dashboard'
       return
     }
 
@@ -62,7 +60,7 @@ const Login = () => {
   const handleFacebookLogin = async () => {
     // If already signed in, just redirect
     if (isSignedIn) {
-      router.replace('/dashboard')
+      window.location.href = '/dashboard'
       return
     }
 
