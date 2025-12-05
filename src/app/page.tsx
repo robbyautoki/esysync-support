@@ -1,65 +1,81 @@
-import Image from "next/image";
+import Header from "@/components/shadcn-studio/blocks/hero-section-12/header";
+import HeroSection from "@/components/shadcn-studio/blocks/hero-section-12/hero-section-12";
+import TestimonialsComponent from "@/components/shadcn-studio/blocks/testimonials-component-06/testimonials-component-06";
+import Footer from "@/components/shadcn-studio/blocks/footer-component-02/footer-component-02";
+import type { NavigationSection } from "@/components/shadcn-studio/blocks/menu-navigation";
+
+const navigationData: NavigationSection[] = [
+  { title: "Startseite", href: "/" },
+  { title: "Hilfe", href: "#hilfe" },
+  {
+    title: "Support",
+    items: [
+      { title: "Anleitungen", href: "/anleitungen" },
+      { title: "FAQ", href: "/faq" },
+      { title: "Fernwartung", href: "/fernwartung" },
+    ],
+  },
+  { title: "Kontakt", href: "#kontakt" },
+];
+
+const testimonials = [
+  {
+    name: "Markus Weber",
+    role: "Immobilienmakler, München",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    content: "Unser Display im Schaufenster zeigte plötzlich nichts mehr an. Der esysync Support hat das Problem innerhalb von Minuten per Fernwartung gelöst!",
+  },
+  {
+    name: "Sandra Hoffmann",
+    role: "Filialleiterin, Sparkasse",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    content: "Die digitalen Exposés in unserer Filiale laufen dank des schnellen Supports wieder einwandfrei. Sehr professionelle Hilfe!",
+  },
+  {
+    name: "Thomas Müller",
+    role: "Geschäftsführer, Immobilien GmbH",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    content: "Seit wir esysync nutzen, haben wir endlich einen zuverlässigen Partner für unsere Display-Systeme. Der Support ist erstklassig.",
+  },
+  {
+    name: "Julia Becker",
+    role: "Marketing, Volksbank",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    content: "Schnelle Reaktionszeiten und kompetente Hilfe bei allen technischen Fragen. So stelle ich mir Support vor!",
+  },
+  {
+    name: "Andreas Fischer",
+    role: "Inhaber, Fischer Immobilien",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    content: "Die Anleitungen sind verständlich und der telefonische Support ist immer erreichbar. Absolute Empfehlung!",
+  },
+  {
+    name: "Petra Schneider",
+    role: "Büroleiterin, Raiffeisenbank",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+    content: "Nach einem Stromausfall waren unsere Displays durcheinander. Der Support hat alles schnell wieder hergestellt.",
+  },
+  {
+    name: "Stefan Braun",
+    role: "IT-Beauftragter, Immobilienbüro",
+    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+    content: "Auch komplexere Probleme werden verständlich erklärt und zügig behoben. Top Service!",
+  },
+  {
+    name: "Maria Klein",
+    role: "Maklerin, RE/MAX Partner",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    content: "Die Fernwartung spart uns viel Zeit. Probleme werden gelöst, ohne dass ein Techniker kommen muss.",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main>
+      <Header navigationData={navigationData} />
+      <HeroSection />
+      <TestimonialsComponent testimonials={testimonials} />
+      <Footer />
+    </main>
   );
 }
