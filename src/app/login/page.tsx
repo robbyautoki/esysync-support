@@ -1,13 +1,36 @@
-import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
+'use client'
 
-export default async function LoginPage() {
-  const { userId } = await auth()
+import { useEffect } from 'react'
+import { useSignIn, useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 
-  if (userId) {
-    redirect('/dashboard')
-  }
+export default function LoginPage() {
+  const { signIn, isLoaded } = useSignIn()
+  const { isSignedIn } = useAuth()
+  const router = useRouter()
 
-  // Redirect to Clerk's hosted sign-in page
-  redirect('https://full-oarfish-57.clerk.accounts.dev/sign-in?redirect_url=https%3A%2F%2Fesysync-support.vercel.app%2Fdashboard')
+  useEffect(() => {
+    if (!isLoaded) return
+
+    // If already signed in, go to dashboard
+    if (isSignedIn) {
+      router.push('/dashboard')
+      return
+    }
+
+    // Start Google OAuth flow immediately
+    if (signIn) {
+      signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/dashboard'
+      })
+    }
+  }, [isLoaded, isSignedIn, signIn, router])
+
+  return (
+    <div className='flex min-h-dvh items-center justify-center bg-muted'>
+      <p className='text-muted-foreground'>Weiterleitung zur Anmeldung...</p>
+    </div>
+  )
 }
