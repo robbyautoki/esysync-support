@@ -33,18 +33,24 @@ const avatars = [
 
 const Login = () => {
   const { signIn, isLoaded } = useSignIn()
-  const { isSignedIn } = useAuth()
+  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth()
   const router = useRouter()
 
   // Redirect to dashboard if already signed in
   useEffect(() => {
-    if (isSignedIn) {
-      router.push('/dashboard')
+    if (isAuthLoaded && isSignedIn) {
+      router.replace('/dashboard')
     }
-  }, [isSignedIn, router])
+  }, [isSignedIn, isAuthLoaded, router])
 
   const handleGoogleLogin = async () => {
-    if (!isLoaded) return
+    // If already signed in, just redirect
+    if (isSignedIn) {
+      router.replace('/dashboard')
+      return
+    }
+
+    if (!isLoaded || !signIn) return
 
     await signIn.authenticateWithRedirect({
       strategy: 'oauth_google',
@@ -54,13 +60,37 @@ const Login = () => {
   }
 
   const handleFacebookLogin = async () => {
-    if (!isLoaded) return
+    // If already signed in, just redirect
+    if (isSignedIn) {
+      router.replace('/dashboard')
+      return
+    }
+
+    if (!isLoaded || !signIn) return
 
     await signIn.authenticateWithRedirect({
       strategy: 'oauth_facebook',
       redirectUrl: '/sso-callback',
       redirectUrlComplete: '/dashboard'
     })
+  }
+
+  // Show loading while checking auth status
+  if (!isAuthLoaded) {
+    return (
+      <div className='flex h-dvh items-center justify-center'>
+        <div className='text-muted-foreground'>Laden...</div>
+      </div>
+    )
+  }
+
+  // If signed in, show loading while redirecting
+  if (isSignedIn) {
+    return (
+      <div className='flex h-dvh items-center justify-center'>
+        <div className='text-muted-foreground'>Weiterleitung zum Dashboard...</div>
+      </div>
+    )
   }
 
   return (
