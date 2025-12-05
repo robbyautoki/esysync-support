@@ -1,6 +1,8 @@
 'use client'
 
-import { useSignIn } from '@clerk/nextjs'
+import { useEffect } from 'react'
+import { useSignIn, useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -31,6 +33,15 @@ const avatars = [
 
 const Login = () => {
   const { signIn, isLoaded } = useSignIn()
+  const { isSignedIn } = useAuth()
+  const router = useRouter()
+
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    if (isSignedIn) {
+      router.push('/dashboard')
+    }
+  }, [isSignedIn, router])
 
   const handleGoogleLogin = async () => {
     if (!isLoaded) return
