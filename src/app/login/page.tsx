@@ -22,7 +22,7 @@ export default async function LoginPage() {
         </CardHeader>
         <CardContent className='space-y-4'>
           <SignedOut>
-            <SignInButton mode='modal' forceRedirectUrl='/dashboard'>
+            <SignInButton mode='redirect' forceRedirectUrl='/dashboard'>
               <Button className='w-full' size='lg'>
                 Anmelden
               </Button>
