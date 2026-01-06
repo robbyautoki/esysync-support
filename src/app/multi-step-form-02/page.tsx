@@ -5,16 +5,8 @@ import type { NavigationSection } from '@/components/shadcn-studio/blocks/menu-n
 
 const navigationData: NavigationSection[] = [
   { title: 'Startseite', href: '/' },
-  { title: 'Hilfe', href: '#hilfe' },
-  {
-    title: 'Support',
-    items: [
-      { title: 'Anleitungen', href: '/anleitungen' },
-      { title: 'FAQ', href: '/faq' },
-      { title: 'Fernwartung', href: '/fernwartung' },
-    ],
-  },
-  { title: 'Kontakt', href: '#kontakt' },
+  { title: 'Status', href: '/ticket-status' },
+  { title: 'FAQ', href: '/faq' },
 ]
 
 const MultiStepFormPage = () => {

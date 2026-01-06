@@ -25,16 +25,8 @@ import type { NavigationSection } from '@/components/shadcn-studio/blocks/menu-n
 // Navigation-Daten
 const navigationData: NavigationSection[] = [
   { title: 'Startseite', href: '/' },
-  { title: 'Ticket-Status', href: '/ticket-status' },
-  {
-    title: 'Support',
-    items: [
-      { title: 'Anleitungen', href: '/anleitungen' },
-      { title: 'FAQ', href: '/faq' },
-      { title: 'Fernwartung', href: '/fernwartung' },
-    ],
-  },
-  { title: 'Kontakt', href: '#kontakt' },
+  { title: 'Status', href: '/ticket-status' },
+  { title: 'FAQ', href: '/faq' },
 ]
 
 interface Guide {
