@@ -17,7 +17,8 @@ import {
   FolderIcon,
   PencilIcon,
   Trash2Icon,
-  GripVerticalIcon
+  GripVerticalIcon,
+  MessageCircleIcon
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -104,6 +105,7 @@ const menuItems: MenuItem[] = [
 
 const supportItems: MenuItem[] = [
   { icon: InboxIcon, label: 'Support-Anfragen', href: '/dashboard/anfragen' },
+  { icon: MessageCircleIcon, label: 'Live-Chat', href: '/dashboard/chat' },
   { icon: PlusIcon, label: 'Neue Anfrage', href: '/multi-step-form-02' },
   {
     icon: ClipboardListIcon,

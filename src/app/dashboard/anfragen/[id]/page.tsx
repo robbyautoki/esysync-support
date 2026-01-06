@@ -21,7 +21,8 @@ import {
   TruckIcon,
   BellIcon,
   ArrowLeftIcon,
-  SaveIcon
+  SaveIcon,
+  MessageCircleIcon
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -229,6 +230,7 @@ const TicketDetailContent = () => {
 
   const supportItems: MenuItem[] = [
     { icon: InboxIcon, label: 'Support-Anfragen', href: '/dashboard/anfragen' },
+    { icon: MessageCircleIcon, label: 'Live-Chat', href: '/dashboard/chat' },
     { icon: PlusIcon, label: 'Neue Anfrage', href: '/multi-step-form-02' },
     { icon: ClipboardListIcon, label: 'Berichte', items: [
       { label: 'Offene Tickets', href: '#' },

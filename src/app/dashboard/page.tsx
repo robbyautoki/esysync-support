@@ -17,7 +17,8 @@ import {
   CheckCircleIcon,
   AlertCircleIcon,
   BookOpenIcon,
-  FolderIcon
+  FolderIcon,
+  MessageCircleIcon
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -199,6 +200,11 @@ const DashboardContent = () => {
       label: 'Support-Anfragen',
       href: '/dashboard/anfragen',
       badge: tickets.length > 0 ? String(tickets.length) : undefined
+    },
+    {
+      icon: MessageCircleIcon,
+      label: 'Live-Chat',
+      href: '/dashboard/chat'
     },
     {
       icon: PlusIcon,

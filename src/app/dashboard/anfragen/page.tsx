@@ -24,7 +24,8 @@ import {
   ListIcon,
   LayoutGridIcon,
   BookOpenIcon,
-  FolderIcon
+  FolderIcon,
+  MessageCircleIcon
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -246,6 +247,7 @@ const AnfragenContent = () => {
 
   const supportItems: MenuItem[] = [
     { icon: InboxIcon, label: 'Support-Anfragen', href: '/dashboard/anfragen', badge: tickets.length > 0 ? String(tickets.length) : undefined },
+    { icon: MessageCircleIcon, label: 'Live-Chat', href: '/dashboard/chat' },
     { icon: PlusIcon, label: 'Neue Anfrage', href: '/multi-step-form-02' },
     {
       icon: ClipboardListIcon,
