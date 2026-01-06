@@ -89,3 +89,29 @@ model Guide {
   @@index([categoryId])
   @@index([published])
 }
+
+// Support Chat
+model ChatSession {
+  id          String        @id @default(cuid())
+  visitorId   String        // Browser-ID für nicht-eingeloggte User
+  visitorName String?       // Optional: Name des Besuchers
+  status      String        @default("ai") // ai, team, closed
+  messages    ChatMessage[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([visitorId])
+  @@index([status])
+}
+
+model ChatMessage {
+  id             String      @id @default(cuid())
+  sessionId      String
+  session        ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role           String      // user, ai, team
+  teamMemberName String?     // Name des Teammitglieds (nur bei role=team)
+  content        String      @db.Text
+  createdAt      DateTime    @default(now())
+
+  @@index([sessionId])
+}
