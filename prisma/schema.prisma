@@ -27,16 +27,18 @@ model SupportTicket {
   // Step 4: Account & Gerätedaten
   accountNumber            String
   displayNumber            String
-  displayLocation          String
-  alternateReturnAddress   String?
+  street                   String   @default("")
+  postalCode               String   @default("")
+  city                     String   @default("")
+  country                  String   @default("Deutschland")
   email                    String
   additionalDeviceAffected Boolean  @default(false)
+  additionalDisplayNumbers Json     @default("[]")
 
   // Step 5: Kontaktdaten
-  differentShippingAddress Boolean  @default(false)
-  shippingAddress          String?
   salutation               String   // herr, frau, divers
   contactPerson            String
+  contactEmail             String?
 
   // Metadaten
   status                   String   @default("open") // open, in_progress, waiting_for_device, repair_in_progress, shipping_back, completed

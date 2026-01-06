@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import type { StepperType } from '@/components/shadcn-studio/blocks/multi-step-form-02/MultiStepForm'
@@ -19,44 +17,13 @@ const ContactStep = ({ stepper }: { stepper: StepperType }) => {
   return (
     <CardContent className='col-span-5 flex flex-col gap-6 p-6 md:col-span-3'>
       <div className='rounded-lg border bg-muted/30 p-6 text-center'>
-        <h3 className='text-lg font-semibold mb-2'>Versand / Ansprechpartner</h3>
+        <h3 className='text-lg font-semibold mb-2'>Ansprechpartner</h3>
         <p className='text-muted-foreground text-sm'>
           Wer soll das Display entgegennehmen?
         </p>
       </div>
 
       <div className='grid gap-5'>
-        {/* Abweichende Versandadresse Checkbox */}
-        <div className='rounded-lg border p-4'>
-          <div className='flex items-start gap-3'>
-            <Checkbox
-              id='different-shipping'
-              checked={formData.differentShippingAddress}
-              onCheckedChange={(checked) => updateFormData({ differentShippingAddress: checked as boolean })}
-              className='mt-0.5'
-            />
-            <Label htmlFor='different-shipping' className='font-medium cursor-pointer'>
-              Abweichende Versandadresse
-            </Label>
-          </div>
-        </div>
-
-        {/* Versandadresse (falls abweichend) */}
-        {formData.differentShippingAddress && (
-          <div className='grid gap-2'>
-            <Label htmlFor='shipping-address'>
-              Versandadresse
-            </Label>
-            <Textarea
-              id='shipping-address'
-              placeholder='Vollständige Versandadresse eingeben...'
-              rows={3}
-              value={formData.shippingAddress}
-              onChange={(e) => updateFormData({ shippingAddress: e.target.value })}
-            />
-          </div>
-        )}
-
         {/* Anrede */}
         <div className='grid gap-2'>
           <Label htmlFor='salutation'>
@@ -80,14 +47,31 @@ const ContactStep = ({ stepper }: { stepper: StepperType }) => {
         {/* Ansprechpartner */}
         <div className='grid gap-2'>
           <Label htmlFor='contact-person'>
-            Ansprechpartner <span className='text-destructive'>*</span>
+            Name des Ansprechpartners <span className='text-destructive'>*</span>
           </Label>
           <Input
             id='contact-person'
-            placeholder='Name des Ansprechpartners'
+            placeholder='Vor- und Nachname'
             value={formData.contactPerson}
             onChange={(e) => updateFormData({ contactPerson: e.target.value })}
           />
+        </div>
+
+        {/* E-Mail des Ansprechpartners */}
+        <div className='grid gap-2'>
+          <Label htmlFor='contact-email'>
+            E-Mail des Ansprechpartners (optional)
+          </Label>
+          <Input
+            id='contact-email'
+            type='email'
+            placeholder='ansprechpartner@email.de'
+            value={formData.contactEmail}
+            onChange={(e) => updateFormData({ contactEmail: e.target.value })}
+          />
+          <p className='text-muted-foreground text-xs'>
+            Falls abweichend von der Haupt-E-Mail-Adresse
+          </p>
         </div>
 
         {/* Hinweis */}

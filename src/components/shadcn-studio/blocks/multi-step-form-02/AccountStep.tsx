@@ -1,19 +1,48 @@
-import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
+import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, XIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import type { StepperType } from '@/components/shadcn-studio/blocks/multi-step-form-02/MultiStepForm'
 import { useFormData } from '@/components/shadcn-studio/blocks/multi-step-form-02/FormContext'
 
+const countries = [
+  'Deutschland',
+  'Österreich',
+  'Schweiz',
+  'Niederlande',
+  'Belgien',
+  'Luxemburg',
+  'Frankreich',
+  'Italien',
+  'Spanien',
+  'Polen',
+  'Tschechien',
+]
+
 const AccountStep = ({ stepper }: { stepper: StepperType }) => {
   const { formData, updateFormData } = useFormData()
 
-  const canProceed = formData.accountNumber && formData.displayNumber && formData.displayLocation && formData.email
+  const canProceed = formData.accountNumber && formData.displayNumber && formData.street && formData.postalCode && formData.city && formData.country && formData.email
+
+  const addDisplayNumber = () => {
+    updateFormData({ additionalDisplayNumbers: [...formData.additionalDisplayNumbers, ''] })
+  }
+
+  const removeDisplayNumber = (index: number) => {
+    const updated = formData.additionalDisplayNumbers.filter((_, i) => i !== index)
+    updateFormData({ additionalDisplayNumbers: updated })
+  }
+
+  const updateDisplayNumber = (index: number, value: string) => {
+    const updated = [...formData.additionalDisplayNumbers]
+    updated[index] = value
+    updateFormData({ additionalDisplayNumbers: updated })
+  }
 
   return (
     <CardContent className='col-span-5 flex flex-col gap-6 p-6 md:col-span-3'>
@@ -51,32 +80,72 @@ const AccountStep = ({ stepper }: { stepper: StepperType }) => {
           />
         </div>
 
-        {/* Standort / Rücksendeadresse */}
-        <div className='grid gap-2'>
-          <Label htmlFor='display-location'>
-            Standort des Displays und gleichzeitig auch Rücksendeadresse <span className='text-destructive'>*</span>
+        {/* Standort / Rücksendeadresse - Einzelfelder */}
+        <div className='space-y-4'>
+          <Label>
+            Standort des Displays / Rücksendeadresse <span className='text-destructive'>*</span>
           </Label>
-          <Textarea
-            id='display-location'
-            placeholder='Vollständige Adresse eingeben:&#10;Straße, Hausnummer&#10;PLZ, Stadt&#10;Land'
-            rows={4}
-            value={formData.displayLocation}
-            onChange={(e) => updateFormData({ displayLocation: e.target.value })}
-          />
-        </div>
+          
+          {/* Straße */}
+          <div className='grid gap-2'>
+            <Label htmlFor='street' className='text-sm text-muted-foreground'>
+              Straße und Hausnummer
+            </Label>
+            <Input
+              id='street'
+              placeholder='Musterstraße 123'
+              value={formData.street}
+              onChange={(e) => updateFormData({ street: e.target.value })}
+            />
+          </div>
 
-        {/* Abweichende Rücksendeadresse */}
-        <div className='grid gap-2'>
-          <Label htmlFor='alternate-return-address'>
-            Abweichende Rücksendeadresse (optional)
-          </Label>
-          <Textarea
-            id='alternate-return-address'
-            placeholder='Falls die Rücksendeadresse abweicht, hier eingeben...'
-            rows={3}
-            value={formData.alternateReturnAddress}
-            onChange={(e) => updateFormData({ alternateReturnAddress: e.target.value })}
-          />
+          {/* PLZ und Ort */}
+          <div className='grid grid-cols-3 gap-4'>
+            <div className='grid gap-2'>
+              <Label htmlFor='postal-code' className='text-sm text-muted-foreground'>
+                PLZ
+              </Label>
+              <Input
+                id='postal-code'
+                placeholder='12345'
+                value={formData.postalCode}
+                onChange={(e) => updateFormData({ postalCode: e.target.value })}
+              />
+            </div>
+            <div className='col-span-2 grid gap-2'>
+              <Label htmlFor='city' className='text-sm text-muted-foreground'>
+                Ort
+              </Label>
+              <Input
+                id='city'
+                placeholder='Musterstadt'
+                value={formData.city}
+                onChange={(e) => updateFormData({ city: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Land */}
+          <div className='grid gap-2'>
+            <Label htmlFor='country' className='text-sm text-muted-foreground'>
+              Land
+            </Label>
+            <Select
+              value={formData.country}
+              onValueChange={(value) => updateFormData({ country: value })}
+            >
+              <SelectTrigger id='country'>
+                <SelectValue placeholder='Land wählen' />
+              </SelectTrigger>
+              <SelectContent>
+                {countries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* E-Mail */}
@@ -99,18 +168,57 @@ const AccountStep = ({ stepper }: { stepper: StepperType }) => {
             <Checkbox
               id='additional-device'
               checked={formData.additionalDeviceAffected}
-              onCheckedChange={(checked) => updateFormData({ additionalDeviceAffected: checked as boolean })}
+              onCheckedChange={(checked) => {
+                updateFormData({ 
+                  additionalDeviceAffected: checked as boolean,
+                  additionalDisplayNumbers: checked ? [''] : []
+                })
+              }}
               className='mt-0.5'
             />
-            <div>
+            <div className='flex-1'>
               <Label htmlFor='additional-device' className='font-medium cursor-pointer'>
-                Ist ein weiteres Gerät betroffen?
+                Sind weitere Geräte betroffen?
               </Label>
               <p className='text-muted-foreground text-sm mt-1'>
-                Bitte markieren, falls ein weiteres Display oder Gerät ebenfalls defekt ist und bearbeitet werden muss.
+                Bitte markieren, falls weitere Displays ebenfalls defekt sind.
               </p>
             </div>
           </div>
+
+          {/* Dynamische Liste für zusätzliche Displaynummern */}
+          {formData.additionalDeviceAffected && (
+            <div className='mt-4 space-y-3 border-t pt-4'>
+              <Label className='text-sm'>Weitere Displaynummern</Label>
+              {formData.additionalDisplayNumbers.map((num, index) => (
+                <div key={index} className='flex gap-2'>
+                  <Input
+                    placeholder={`Displaynummer ${index + 2}`}
+                    value={num}
+                    onChange={(e) => updateDisplayNumber(index, e.target.value)}
+                  />
+                  <Button
+                    type='button'
+                    variant='outline'
+                    size='icon'
+                    onClick={() => removeDisplayNumber(index)}
+                  >
+                    <XIcon className='size-4' />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={addDisplayNumber}
+                className='w-full'
+              >
+                <PlusIcon className='size-4 mr-2' />
+                Weitere Displaynummer hinzufügen
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

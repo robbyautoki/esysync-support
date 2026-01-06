@@ -122,23 +122,23 @@ const SummaryStep = ({ stepper }: { stepper: StepperType }) => {
             <Separator className='my-2' />
             <div>
               <span className='text-muted-foreground'>Standort / Rücksendeadresse:</span>
-              <p className='font-medium mt-1 whitespace-pre-line'>{formData.displayLocation}</p>
+              <p className='font-medium mt-1'>
+                {formData.street}<br />
+                {formData.postalCode} {formData.city}<br />
+                {formData.country}
+              </p>
             </div>
-            {formData.alternateReturnAddress && (
-              <div>
-                <span className='text-muted-foreground'>Abweichende Rücksendeadresse:</span>
-                <p className='font-medium mt-1 whitespace-pre-line'>{formData.alternateReturnAddress}</p>
-              </div>
-            )}
             <Separator className='my-2' />
             <div className='flex justify-between'>
               <span className='text-muted-foreground'>E-Mail:</span>
               <span className='font-medium'>{formData.email}</span>
             </div>
-            {formData.additionalDeviceAffected && (
-              <div className='flex justify-between'>
-                <span className='text-muted-foreground'>Weiteres Gerät betroffen:</span>
-                <span className='font-medium text-amber-600'>Ja</span>
+            {formData.additionalDeviceAffected && formData.additionalDisplayNumbers.length > 0 && (
+              <div>
+                <span className='text-muted-foreground'>Weitere betroffene Displays:</span>
+                <p className='font-medium mt-1'>
+                  {formData.additionalDisplayNumbers.filter(n => n).join(', ')}
+                </p>
               </div>
             )}
           </div>
@@ -160,10 +160,10 @@ const SummaryStep = ({ stepper }: { stepper: StepperType }) => {
                 {formData.salutation && salutationMap[formData.salutation]} {formData.contactPerson}
               </span>
             </div>
-            {formData.differentShippingAddress && formData.shippingAddress && (
-              <div>
-                <span className='text-muted-foreground'>Abweichende Versandadresse:</span>
-                <p className='font-medium mt-1 whitespace-pre-line'>{formData.shippingAddress}</p>
+            {formData.contactEmail && (
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>E-Mail (Ansprechpartner):</span>
+                <span className='font-medium'>{formData.contactEmail}</span>
               </div>
             )}
           </div>

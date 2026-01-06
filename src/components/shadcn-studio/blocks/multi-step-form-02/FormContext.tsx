@@ -48,7 +48,7 @@ export type CategoryType = keyof typeof problemCategories
 // Versandoptionen
 export const shippingOptions = [
   { id: 'own-packaging', label: 'Eigene Verpackung', price: '18,00 €', description: 'Sie verpacken das Display selbst und versenden es', recommended: false },
-  { id: 'avantor-box', label: 'AVANTOR-Box mit Rückschein', price: '18,00 €', description: 'Wir senden Ihnen eine sichere Verpackung zu', recommended: false },
+  { id: 'avantor-box', label: 'AVANTOR-Box mit Rückschein', price: '99,00 €', description: 'Wir senden Ihnen eine sichere Verpackung zu', recommended: false },
   { id: 'technician', label: 'Techniker-Abholung', price: 'Auf Anfrage', description: 'Ein Techniker holt das Display bei Ihnen ab', recommended: false },
   { id: 'complete-swap', label: 'Kompletttausch', price: '229,00 €', description: 'Sofortiger Austausch gegen ein neues Display', recommended: true },
 ] as const
@@ -70,16 +70,18 @@ export interface FormData {
   // Schritt 4: Account- & Gerätedaten
   accountNumber: string
   displayNumber: string
-  displayLocation: string
-  alternateReturnAddress: string
+  street: string
+  postalCode: string
+  city: string
+  country: string
   email: string
   additionalDeviceAffected: boolean
+  additionalDisplayNumbers: string[]
 
   // Schritt 5: Ansprechpartner
-  differentShippingAddress: boolean
-  shippingAddress: string
   salutation: 'herr' | 'frau' | 'divers' | null
   contactPerson: string
+  contactEmail: string
 
   // Nach erfolgreicher Erstellung
   ticketNumber?: string
@@ -98,14 +100,16 @@ const initialFormData: FormData = {
   shippingOption: null,
   accountNumber: '',
   displayNumber: '',
-  displayLocation: '',
-  alternateReturnAddress: '',
+  street: '',
+  postalCode: '',
+  city: '',
+  country: 'Deutschland',
   email: '',
   additionalDeviceAffected: false,
-  differentShippingAddress: false,
-  shippingAddress: '',
+  additionalDisplayNumbers: [],
   salutation: null,
   contactPerson: '',
+  contactEmail: '',
 }
 
 const FormContext = createContext<FormContextType | null>(null)

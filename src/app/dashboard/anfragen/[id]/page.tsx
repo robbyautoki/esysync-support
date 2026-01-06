@@ -81,14 +81,16 @@ interface SupportTicket {
   status: string
   accountNumber: string
   displayNumber: string
-  displayLocation: string
-  alternateReturnAddress: string | null
+  street: string
+  postalCode: string
+  city: string
+  country: string
   email: string
   additionalDeviceAffected: boolean
-  differentShippingAddress: boolean
-  shippingAddress: string | null
+  additionalDisplayNumbers: string[]
   salutation: string
   contactPerson: string
+  contactEmail: string | null
   createdAt: string
   updatedAt: string
   statusHistory: StatusHistoryItem[]
@@ -366,18 +368,17 @@ const TicketDetailContent = () => {
                     </div>
                     <div>
                       <p className='text-sm text-muted-foreground'>Standort / Rücksendeadresse</p>
-                      <p className='font-medium whitespace-pre-line'>{ticket.displayLocation}</p>
+                      <p className='font-medium'>
+                        {ticket.street}<br />
+                        {ticket.postalCode} {ticket.city}<br />
+                        {ticket.country}
+                      </p>
                     </div>
-                    {ticket.alternateReturnAddress && (
+                    {ticket.additionalDeviceAffected && ticket.additionalDisplayNumbers?.length > 0 && (
                       <div>
-                        <p className='text-sm text-muted-foreground'>Abweichende Rücksendeadresse</p>
-                        <p className='font-medium whitespace-pre-line'>{ticket.alternateReturnAddress}</p>
+                        <p className='text-sm text-muted-foreground'>Weitere betroffene Displays</p>
+                        <p className='font-medium'>{ticket.additionalDisplayNumbers.join(', ')}</p>
                       </div>
-                    )}
-                    {ticket.additionalDeviceAffected && (
-                      <Badge variant='outline' className='text-amber-600 border-amber-600'>
-                        Weiteres Gerät betroffen
-                      </Badge>
                     )}
                   </CardContent>
                 </Card>
@@ -398,10 +399,10 @@ const TicketDetailContent = () => {
                         <p className='font-medium'>{ticket.email}</p>
                       </div>
                     </div>
-                    {ticket.differentShippingAddress && ticket.shippingAddress && (
+                    {ticket.contactEmail && (
                       <div>
-                        <p className='text-sm text-muted-foreground'>Abweichende Versandadresse</p>
-                        <p className='font-medium whitespace-pre-line'>{ticket.shippingAddress}</p>
+                        <p className='text-sm text-muted-foreground'>E-Mail (Ansprechpartner)</p>
+                        <p className='font-medium'>{ticket.contactEmail}</p>
                       </div>
                     )}
                   </CardContent>
