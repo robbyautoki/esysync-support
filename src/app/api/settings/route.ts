@@ -1,10 +1,8 @@
-import OpenAI from 'openai'
-import { prisma } from './prisma'
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { auth } from '@clerk/nextjs/server'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
+// Default System Prompt
 const DEFAULT_SYSTEM_PROMPT = `Du bist der freundliche Support-Assistent von esysync/AVANTO. Du hilfst Kunden bei Fragen zu ihren Digital Signage Displays.
 
 Wichtige Informationen über esysync/AVANTO:
@@ -40,39 +38,63 @@ Verhalte dich freundlich und hilfsbereit. Wenn du eine Frage nicht beantworten k
 
 Antworte immer auf Deutsch und halte deine Antworten kurz und präzise.`
 
-// System-Prompt aus Datenbank laden
-async function getSystemPrompt(): Promise<string> {
+export async function GET() {
   try {
-    const setting = await prisma.settings.findUnique({
-      where: { key: 'systemPrompt' },
-    })
-    return setting?.value || DEFAULT_SYSTEM_PROMPT
-  } catch {
-    return DEFAULT_SYSTEM_PROMPT
-  }
-}
-
-export async function getChatResponse(
-  messages: { role: 'user' | 'assistant'; content: string }[]
-): Promise<string> {
-  try {
-    const systemPrompt = await getSystemPrompt()
+    const settings = await prisma.settings.findMany()
     
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages,
-      ],
-      max_tokens: 500,
-      temperature: 0.7,
-    })
+    // Convert to key-value object
+    const settingsObj: Record<string, string> = {}
+    for (const setting of settings) {
+      settingsObj[setting.key] = setting.value
+    }
+    
+    // Add default system prompt if not set
+    if (!settingsObj.systemPrompt) {
+      settingsObj.systemPrompt = DEFAULT_SYSTEM_PROMPT
+    }
 
-    return response.choices[0]?.message?.content || 'Entschuldigung, ich konnte keine Antwort generieren.'
+    return NextResponse.json({ success: true, settings: settingsObj })
   } catch (error) {
-    console.error('OpenAI API error:', error)
-    return 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder sprechen Sie mit einem Mitarbeiter.'
+    console.error('Fetch settings error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Einstellungen konnten nicht geladen werden' },
+      { status: 500 }
+    )
   }
 }
 
-export default openai
+export async function POST(request: Request) {
+  try {
+    const { userId } = await auth()
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'Nicht autorisiert' },
+        { status: 401 }
+      )
+    }
+
+    const { key, value } = await request.json()
+
+    if (!key || value === undefined) {
+      return NextResponse.json(
+        { success: false, error: 'Key und Value sind erforderlich' },
+        { status: 400 }
+      )
+    }
+
+    // Upsert setting
+    const setting = await prisma.settings.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
+    })
+
+    return NextResponse.json({ success: true, setting })
+  } catch (error) {
+    console.error('Save setting error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Einstellung konnte nicht gespeichert werden' },
+      { status: 500 }
+    )
+  }
+}

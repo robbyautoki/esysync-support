@@ -18,12 +18,14 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB))
 }
 
-// Wissensdatenbank durchsuchen
+// Wissensdatenbank + Anleitungen durchsuchen
 async function searchKnowledge(query: string): Promise<string | null> {
   try {
-    // Prüfen ob Chunks vorhanden sind
-    const chunksCount = await prisma.knowledgeChunk.count()
-    if (chunksCount === 0) return null
+    // Prüfen ob Chunks vorhanden sind (Knowledge + Guides)
+    const knowledgeCount = await prisma.knowledgeChunk.count()
+    const guideCount = await prisma.guideChunk.count()
+    
+    if (knowledgeCount === 0 && guideCount === 0) return null
 
     // Query embedden
     const embeddingResponse = await openai.embeddings.create({
@@ -32,8 +34,8 @@ async function searchKnowledge(query: string): Promise<string | null> {
     })
     const queryEmbedding = embeddingResponse.data[0].embedding
 
-    // Alle Chunks laden
-    const chunks = await prisma.knowledgeChunk.findMany({
+    // Alle Knowledge-Chunks laden
+    const knowledgeChunks = await prisma.knowledgeChunk.findMany({
       include: {
         document: {
           select: { filename: true },
@@ -41,21 +43,50 @@ async function searchKnowledge(query: string): Promise<string | null> {
       },
     })
 
-    // Similarity berechnen und Top 3 finden
-    const results = chunks
-      .map(chunk => {
-        const chunkEmbedding = JSON.parse(chunk.embedding) as number[]
-        const similarity = cosineSimilarity(queryEmbedding, chunkEmbedding)
-        return { content: chunk.content, similarity, filename: chunk.document.filename }
+    // Alle Guide-Chunks laden
+    const guideChunks = await prisma.guideChunk.findMany({
+      include: {
+        guide: {
+          select: { title: true },
+        },
+      },
+    })
+
+    // Alle Chunks zusammenführen und Similarity berechnen
+    const allResults: { content: string; similarity: number; source: string }[] = []
+
+    // Knowledge-Chunks verarbeiten
+    for (const chunk of knowledgeChunks) {
+      const chunkEmbedding = JSON.parse(chunk.embedding) as number[]
+      const similarity = cosineSimilarity(queryEmbedding, chunkEmbedding)
+      allResults.push({
+        content: chunk.content,
+        similarity,
+        source: `Dokument: ${chunk.document.filename}`,
       })
+    }
+
+    // Guide-Chunks verarbeiten
+    for (const chunk of guideChunks) {
+      const chunkEmbedding = JSON.parse(chunk.embedding) as number[]
+      const similarity = cosineSimilarity(queryEmbedding, chunkEmbedding)
+      allResults.push({
+        content: chunk.content,
+        similarity,
+        source: `Anleitung: ${chunk.guide.title}`,
+      })
+    }
+
+    // Top 5 relevante Ergebnisse finden
+    const results = allResults
       .filter(r => r.similarity > 0.3) // Mindest-Ähnlichkeit
       .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 3)
+      .slice(0, 5)
 
     if (results.length === 0) return null
 
     const contextText = results
-      .map(r => `[Aus "${r.filename}"]: ${r.content}`)
+      .map(r => `[${r.source}]: ${r.content}`)
       .join('\n\n')
 
     return `[WISSENSDATENBANK-KONTEXT - Nutze diese Informationen für deine Antwort wenn relevant:]\n${contextText}`

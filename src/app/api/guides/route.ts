@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { updateGuideChunks } from '@/lib/guide-embeddings'
 
 // GET: Alle Guides abrufen (mit optionalen Filtern)
 export async function GET(request: Request) {
@@ -83,6 +84,9 @@ export async function POST(request: Request) {
         category: true,
       },
     })
+
+    // Embeddings für Wissensdatenbank erstellen
+    await updateGuideChunks(guide.id, guide.title, guide.content)
 
     return NextResponse.json({ success: true, guide })
   } catch (error) {

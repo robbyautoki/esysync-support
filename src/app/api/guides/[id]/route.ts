@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { updateGuideChunks, deleteGuideChunks } from '@/lib/guide-embeddings'
 
 // GET: Einzelnen Guide abrufen
 export async function GET(
@@ -91,6 +92,11 @@ export async function PATCH(
       },
     })
 
+    // Embeddings aktualisieren wenn Titel oder Content geändert
+    if (data.title || data.content) {
+      await updateGuideChunks(guide.id, guide.title, guide.content)
+    }
+
     return NextResponse.json({ success: true, guide })
   } catch (error) {
     console.error('Guide update error:', error)
@@ -120,6 +126,9 @@ export async function DELETE(
         { status: 404 }
       )
     }
+
+    // Chunks löschen (wird auch durch Cascade gelöscht, aber sicherheitshalber)
+    await deleteGuideChunks(id)
 
     await prisma.guide.delete({
       where: { id },
