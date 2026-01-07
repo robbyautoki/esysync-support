@@ -31,8 +31,6 @@ import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   Sidebar,
@@ -69,11 +67,9 @@ interface KnowledgeDocument {
   createdAt: string
 }
 
-interface SearchResult {
-  id: string
+interface ChatMessage {
+  role: 'user' | 'ai'
   content: string
-  similarity: number
-  documentFilename: string
 }
 
 type MenuSubItem = { label: string; href: string; badge?: string }
@@ -169,10 +165,13 @@ export default function DashboardWissenPage() {
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
-  const [searching, setSearching] = useState(false)
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { role: 'ai', content: 'Hallo! Ich bin der KI-Assistent. Stellen Sie mir eine Frage, um die Wissensdatenbank zu testen.' }
+  ])
+  const [chatInput, setChatInput] = useState('')
+  const [sending, setSending] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   const fetchDocuments = async () => {
     try {
@@ -236,24 +235,38 @@ export default function DashboardWissenPage() {
     }
   }
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || sending) return
 
-    setSearching(true)
+    const userMessage = chatInput.trim()
+    setChatInput('')
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }])
+    setSending(true)
+
     try {
-      const response = await fetch('/api/knowledge/search', {
+      const response = await fetch('/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: searchQuery, limit: 5 }),
+        body: JSON.stringify({
+          sessionId: 'test-session',
+          content: userMessage,
+          visitorId: 'test-visitor',
+        }),
       })
       const data = await response.json()
-      if (data.success) {
-        setSearchResults(data.results)
+      if (data.success && data.aiResponse) {
+        setChatMessages(prev => [...prev, { role: 'ai', content: data.aiResponse }])
+      } else {
+        setChatMessages(prev => [...prev, { role: 'ai', content: 'Entschuldigung, es ist ein Fehler aufgetreten.' }])
       }
     } catch (err) {
-      console.error('Search error:', err)
+      console.error('Chat error:', err)
+      setChatMessages(prev => [...prev, { role: 'ai', content: 'Entschuldigung, es ist ein Fehler aufgetreten.' }])
     } finally {
-      setSearching(false)
+      setSending(false)
+      setTimeout(() => {
+        chatContainerRef.current?.scrollTo({ top: chatContainerRef.current.scrollHeight, behavior: 'smooth' })
+      }, 100)
     }
   }
 
@@ -346,44 +359,58 @@ export default function DashboardWissenPage() {
                 </CardContent>
               </Card>
 
-              {/* Test-Suche */}
+              {/* Chat testen */}
               <Card>
                 <CardHeader>
                   <CardTitle className='flex items-center gap-2'>
                     <BotIcon className='size-5' />
-                    Wissensdatenbank testen
+                    Chat testen
                   </CardTitle>
                   <CardDescription>
-                    Testen Sie die semantische Suche
+                    Testen Sie die KI mit Ihrer Wissensdatenbank
                   </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-4'>
+                  <div 
+                    ref={chatContainerRef}
+                    className='h-64 overflow-y-auto space-y-3 p-3 rounded-lg bg-muted/30 border'
+                  >
+                    {chatMessages.map((msg, idx) => (
+                      <div 
+                        key={idx} 
+                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div 
+                          className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                            msg.role === 'user' 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-background border'
+                          }`}
+                        >
+                          {msg.content}
+                        </div>
+                      </div>
+                    ))}
+                    {sending && (
+                      <div className='flex justify-start'>
+                        <div className='bg-background border rounded-lg px-3 py-2'>
+                          <Loader2Icon className='size-4 animate-spin' />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <div className='flex gap-2'>
                     <Input
                       placeholder='Frage eingeben...'
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                      disabled={sending}
                     />
-                    <Button onClick={handleSearch} disabled={searching}>
-                      {searching ? <Loader2Icon className='size-4 animate-spin' /> : <SendIcon className='size-4' />}
+                    <Button onClick={handleSendMessage} disabled={sending || !chatInput.trim()}>
+                      {sending ? <Loader2Icon className='size-4 animate-spin' /> : <SendIcon className='size-4' />}
                     </Button>
                   </div>
-                  {searchResults.length > 0 && (
-                    <div className='space-y-2 max-h-48 overflow-y-auto'>
-                      {searchResults.map((result) => (
-                        <div key={result.id} className='p-3 rounded-lg bg-muted/50 text-sm'>
-                          <div className='flex items-center justify-between mb-1'>
-                            <span className='font-medium text-xs'>{result.documentFilename}</span>
-                            <Badge variant='outline' className='text-xs'>
-                              {(result.similarity * 100).toFixed(0)}%
-                            </Badge>
-                          </div>
-                          <p className='text-muted-foreground line-clamp-2'>{result.content}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </CardContent>
               </Card>
 
