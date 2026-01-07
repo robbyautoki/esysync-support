@@ -24,6 +24,16 @@ function generateVisitorId() {
   return visitorId
 }
 
+function formatMessage(content: string) {
+  const parts = content.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    return part
+  })
+}
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -255,7 +265,7 @@ export default function ChatWidget() {
                       {msg.teamMemberName}
                     </p>
                   )}
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  <p className="text-sm whitespace-pre-wrap">{formatMessage(msg.content)}</p>
                 </div>
               </div>
             ))}
