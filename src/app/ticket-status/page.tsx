@@ -28,7 +28,6 @@ import type { NavigationSection } from '@/components/shadcn-studio/blocks/menu-n
 const navigationData: NavigationSection[] = [
   { title: 'Startseite', href: '/' },
   { title: 'Status', href: '/ticket-status' },
-  { title: 'FAQ', href: '/faq' },
 ]
 
 interface StatusHistoryItem {

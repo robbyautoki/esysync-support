@@ -53,25 +53,17 @@ const Header = ({ navigationData, className }: HeaderProps) => {
         {/* Navigation */}
         <MenuNavigation navigationData={navigationData} className='grow max-lg:hidden' />
 
-        {/* Login Button */}
-
         {/* Navigation for small screens */}
-        <div className='flex gap-4'>
-          <Button asChild>
-            <a href='/login'>Login</a>
-          </Button>
-
-          <MenuDropdown
-            align='end'
-            navigationData={navigationData}
-            trigger={
-              <Button variant='outline' size='icon' className='lg:hidden'>
-                <MenuIcon />
-                <span className='sr-only'>Menu</span>
-              </Button>
-            }
-          />
-        </div>
+        <MenuDropdown
+          align='end'
+          navigationData={navigationData}
+          trigger={
+            <Button variant='outline' size='icon' className='lg:hidden'>
+              <MenuIcon />
+              <span className='sr-only'>Menu</span>
+            </Button>
+          }
+        />
       </div>
     </header>
   )
