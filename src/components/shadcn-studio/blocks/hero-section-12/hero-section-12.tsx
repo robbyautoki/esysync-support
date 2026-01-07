@@ -1,4 +1,4 @@
-import { HeadphonesIcon } from 'lucide-react'
+import { HeadphonesIcon, BookOpenIcon } from 'lucide-react'
 
 import { MotionPreset } from '@/components/ui/motion-preset'
 import { Button } from '@/components/ui/button'
@@ -105,7 +105,12 @@ const HeroSection = () => {
                 </a>
               </Button>
 
-
+              <Button asChild variant='outline' className='rounded-full text-base has-[>svg]:px-6' size='lg'>
+                <a href='/anleitungen'>
+                  Anleitungen
+                  <BookOpenIcon />
+                </a>
+              </Button>
             </MotionPreset>
           </div>
           <MotionPreset
