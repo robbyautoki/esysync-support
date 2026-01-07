@@ -53,17 +53,23 @@ const Header = ({ navigationData, className }: HeaderProps) => {
         {/* Navigation */}
         <MenuNavigation navigationData={navigationData} className='grow max-lg:hidden' />
 
-        {/* Navigation for small screens */}
-        <MenuDropdown
-          align='end'
-          navigationData={navigationData}
-          trigger={
-            <Button variant='outline' size='icon' className='lg:hidden'>
-              <MenuIcon />
-              <span className='sr-only'>Menu</span>
-            </Button>
-          }
-        />
+        {/* Ticket erstellen Button + Mobile Menu */}
+        <div className='flex items-center gap-4'>
+          <Button asChild>
+            <a href='/multi-step-form-02'>Ticket erstellen</a>
+          </Button>
+
+          <MenuDropdown
+            align='end'
+            navigationData={navigationData}
+            trigger={
+              <Button variant='outline' size='icon' className='lg:hidden'>
+                <MenuIcon />
+                <span className='sr-only'>Menu</span>
+              </Button>
+            }
+          />
+        </div>
       </div>
     </header>
   )
