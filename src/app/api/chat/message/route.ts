@@ -2,6 +2,55 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getChatResponse } from '@/lib/openai'
 
+// Funktion um Ticketnummer zu erkennen und Status abzufragen
+async function checkForTicketStatus(content: string): Promise<string | null> {
+  // Pattern für Ticketnummern: SUP-XXXXXX
+  const ticketPattern = /SUP-[A-Z0-9]{6}/gi
+  const matches = content.match(ticketPattern)
+  
+  if (!matches || matches.length === 0) return null
+  
+  const ticketNumber = matches[0].toUpperCase()
+  
+  try {
+    const ticket = await prisma.supportTicket.findUnique({
+      where: { ticketNumber },
+      select: {
+        ticketNumber: true,
+        status: true,
+        category: true,
+        problemDetail: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    })
+    
+    if (!ticket) {
+      return `[TICKET-STATUS: Ticket ${ticketNumber} wurde nicht gefunden. Bitte überprüfen Sie die Nummer.]`
+    }
+    
+    const statusMap: Record<string, string> = {
+      'open': 'Offen - Wird bearbeitet',
+      'in_progress': 'In Bearbeitung',
+      'waiting_for_device': 'Warten auf Gerät',
+      'device_received': 'Gerät eingegangen',
+      'in_repair': 'In Reparatur',
+      'completed': 'Abgeschlossen',
+      'shipped': 'Versendet',
+      'closed': 'Geschlossen',
+    }
+    
+    const statusText = statusMap[ticket.status] || ticket.status
+    const createdDate = new Date(ticket.createdAt).toLocaleDateString('de-DE')
+    const updatedDate = new Date(ticket.updatedAt).toLocaleDateString('de-DE')
+    
+    return `[TICKET-STATUS: Ticket ${ticket.ticketNumber} - Status: ${statusText}. Erstellt am: ${createdDate}. Letzte Aktualisierung: ${updatedDate}. Kategorie: ${ticket.category}.]`
+  } catch (error) {
+    console.error('Ticket lookup error:', error)
+    return null
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { sessionId, content } = await request.json()
@@ -41,12 +90,18 @@ export async function POST(request: Request) {
 
     // Wenn Status "ai" ist, AI-Antwort generieren
     if (session.status === 'ai') {
+      // Prüfen ob eine Ticketnummer enthalten ist
+      const ticketStatus = await checkForTicketStatus(content)
+      
       // Nachrichten für OpenAI vorbereiten
       const chatHistory = session.messages.map((msg) => ({
         role: (msg.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
         content: msg.content,
       }))
-      chatHistory.push({ role: 'user', content })
+      
+      // Content mit Ticket-Status erweitern falls vorhanden
+      const enrichedContent = ticketStatus ? `${content}\n\n${ticketStatus}` : content
+      chatHistory.push({ role: 'user', content: enrichedContent })
 
       // AI-Antwort generieren
       const aiResponse = await getChatResponse(chatHistory)

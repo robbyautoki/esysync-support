@@ -19,6 +19,7 @@ import {
   BotIcon,
   HeadphonesIcon,
   XCircleIcon,
+  LogOutIcon,
   BookOpenIcon,
   FolderIcon
 } from 'lucide-react'
@@ -252,6 +253,26 @@ export default function DashboardChatPage() {
     }
   }
 
+  const handleLeaveSession = async () => {
+    if (!selectedSession) return
+    try {
+      await fetch('/api/chat/leave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          sessionId: selectedSession.id,
+          teamMemberName: teamMemberName || undefined,
+        }),
+      })
+      // Session aktualisieren
+      setSelectedSession({ ...selectedSession, status: 'ai' })
+      await fetchMessages(selectedSession.id)
+      await fetchSessions()
+    } catch (error) {
+      console.error('Leave session error:', error)
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ai':
@@ -381,6 +402,12 @@ export default function DashboardChatPage() {
                         </div>
                         <div className='flex items-center gap-2'>
                           {getStatusBadge(selectedSession.status)}
+                          {selectedSession.status === 'team' && (
+                            <Button variant='outline' size='sm' onClick={handleLeaveSession}>
+                              <LogOutIcon className='size-4 mr-1' />
+                              Verlassen
+                            </Button>
+                          )}
                           <Button variant='outline' size='sm' onClick={handleCloseSession}>
                             <XCircleIcon className='size-4 mr-1' />
                             Schließen
