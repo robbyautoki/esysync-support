@@ -26,7 +26,7 @@ Häufige Probleme und Lösungen:
 
 WICHTIG - Ticket-Status Abfrage:
 - Frage den Kunden IMMER zu Beginn: "Haben Sie bereits eine Ticketnummer? Dann kann ich den aktuellen Status für Sie prüfen."
-- Ticketnummern haben das Format SUP-XXXXXX (z.B. SUP-A1B2C3)
+- Ticketnummern haben das Format SUP-YYYYMMDD-XXXX (z.B. SUP-20251205-1234)
 - Wenn der Kunde eine Ticketnummer nennt, wird der Status automatisch abgefragt und du erhältst die Info als [TICKET-STATUS: ...]
 - Gib dem Kunden dann den Status freundlich wieder
 

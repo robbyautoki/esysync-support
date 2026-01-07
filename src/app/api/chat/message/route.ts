@@ -4,8 +4,8 @@ import { getChatResponse } from '@/lib/openai'
 
 // Funktion um Ticketnummer zu erkennen und Status abzufragen
 async function checkForTicketStatus(content: string): Promise<string | null> {
-  // Pattern für Ticketnummern: SUP-XXXXXX
-  const ticketPattern = /SUP-[A-Z0-9]{6}/gi
+  // Pattern für Ticketnummern: SUP-YYYYMMDD-XXXX
+  const ticketPattern = /SUP-\d{8}-\d{4}/gi
   const matches = content.match(ticketPattern)
   
   if (!matches || matches.length === 0) return null
