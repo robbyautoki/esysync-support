@@ -12,6 +12,7 @@ import {
   SearchIcon,
   InboxIcon,
   SettingsIcon,
+  UsersIcon,
   Loader2Icon,
   BellIcon,
   BookOpenIcon,
@@ -137,6 +138,7 @@ const anleitungenItems: MenuItem[] = [
 ]
 
 const settingsItems: MenuItem[] = [
+  { icon: UsersIcon, label: 'Team verwalten', href: '/dashboard/team' },
   { icon: SettingsIcon, label: 'Einstellungen', href: '/dashboard/einstellungen' }
 ]
 

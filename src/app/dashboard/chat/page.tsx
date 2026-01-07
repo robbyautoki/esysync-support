@@ -11,6 +11,7 @@ import {
   SearchIcon,
   InboxIcon,
   SettingsIcon,
+  UsersIcon,
   Loader2Icon,
   BellIcon,
   MessageCircleIcon,
@@ -83,7 +84,10 @@ type MenuItem = { icon: ComponentType; label: string } & (
 )
 
 const menuItems: MenuItem[] = [{ icon: ChartColumnBigIcon, label: 'Dashboard', href: '/dashboard' }]
-const settingsItems: MenuItem[] = [{ icon: SettingsIcon, label: 'Einstellungen', href: '/dashboard/einstellungen' }]
+const settingsItems: MenuItem[] = [
+  { icon: UsersIcon, label: 'Team verwalten', href: '/dashboard/team' },
+  { icon: SettingsIcon, label: 'Einstellungen', href: '/dashboard/einstellungen' }
+]
 
 const SidebarGroupedMenuItems = ({ data, groupLabel }: { data: MenuItem[]; groupLabel?: string }) => (
   <SidebarGroup>
