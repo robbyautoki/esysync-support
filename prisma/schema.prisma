@@ -115,3 +115,29 @@ model ChatMessage {
 
   @@index([sessionId])
 }
+
+// Wissensdatenbank
+model KnowledgeDocument {
+  id        String           @id @default(cuid())
+  filename  String
+  fileUrl   String           // Vercel Blob URL
+  fileType  String           // pdf, docx, txt
+  fileSize  Int
+  content   String           @db.Text // Extrahierter Volltext
+  chunks    KnowledgeChunk[]
+  createdAt DateTime         @default(now())
+
+  @@index([fileType])
+}
+
+model KnowledgeChunk {
+  id         String            @id @default(cuid())
+  documentId String
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  content    String            @db.Text
+  embedding  String            @db.Text // JSON Array der Embeddings
+  chunkIndex Int
+  createdAt  DateTime          @default(now())
+
+  @@index([documentId])
+}

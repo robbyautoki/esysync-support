@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type ComponentType, type CSSProperties } from 'react'
+import { useEffect, useState, useRef, type ComponentType, type CSSProperties } from 'react'
 
 import {
   BellIcon,
@@ -17,10 +17,13 @@ import {
   FolderIcon,
   MessageCircleIcon,
   UsersIcon,
+  UploadIcon,
+  FileTextIcon,
+  TrashIcon,
   DatabaseIcon,
-  MailIcon,
-  XCircleIcon,
-  UserIcon
+  SendIcon,
+  BotIcon,
+  ExternalLinkIcon
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -29,7 +32,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Textarea } from '@/components/ui/textarea'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   Sidebar,
@@ -56,21 +59,21 @@ import LanguageDropdown from '@/components/shadcn-studio/blocks/dropdown-languag
 import NotificationDropdown from '@/components/shadcn-studio/blocks/dropdown-notification'
 import ClerkProfileDropdown from '@/components/shadcn-studio/blocks/dropdown-profile-clerk'
 
-interface TeamUser {
+interface KnowledgeDocument {
   id: string
-  email: string
-  firstName: string | null
-  lastName: string | null
-  imageUrl: string
-  createdAt: number
-  role: string
+  filename: string
+  fileUrl: string
+  fileType: string
+  fileSize: number
+  chunksCount: number
+  createdAt: string
 }
 
-interface Invitation {
+interface SearchResult {
   id: string
-  emailAddress: string
-  status: string
-  createdAt: number
+  content: string
+  similarity: number
+  documentFilename: string
 }
 
 type MenuSubItem = { label: string; href: string; badge?: string }
@@ -156,22 +159,27 @@ const SidebarGroupedMenuItems = ({ data, groupLabel }: { data: MenuItem[]; group
   </SidebarGroup>
 )
 
-export default function DashboardTeamPage() {
-  const [users, setUsers] = useState<TeamUser[]>([])
-  const [invitations, setInvitations] = useState<Invitation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [sending, setSending] = useState(false)
-  const [email, setEmail] = useState('')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+}
 
-  const fetchData = async () => {
+export default function DashboardWissenPage() {
+  const [documents, setDocuments] = useState<KnowledgeDocument[]>([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [searching, setSearching] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const fetchDocuments = async () => {
     try {
-      const response = await fetch('/api/invitations')
+      const response = await fetch('/api/knowledge/documents')
       const data = await response.json()
       if (data.success) {
-        setUsers(data.users)
-        setInvitations(data.invitations)
+        setDocuments(data.documents)
       }
     } catch (err) {
       console.error('Fetch error:', err)
@@ -181,47 +189,71 @@ export default function DashboardTeamPage() {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchDocuments()
   }, [])
 
-  const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email.trim()) return
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    setSending(true)
-    setError('')
-    setSuccess('')
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
 
     try {
-      const response = await fetch('/api/invitations', {
+      const response = await fetch('/api/knowledge/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emailAddress: email }),
+        body: formData,
       })
       const data = await response.json()
 
       if (data.success) {
-        setSuccess(`Einladung an ${email} wurde gesendet!`)
-        setEmail('')
-        fetchData()
+        fetchDocuments()
       } else {
-        setError(data.error || 'Fehler beim Senden der Einladung')
+        alert(data.error || 'Upload fehlgeschlagen')
       }
     } catch (err) {
-      setError('Fehler beim Senden der Einladung')
+      console.error('Upload error:', err)
+      alert('Upload fehlgeschlagen')
     } finally {
-      setSending(false)
+      setUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     }
   }
 
-  const handleRevokeInvitation = async (invitationId: string) => {
+  const handleDelete = async (id: string) => {
+    if (!confirm('Dokument wirklich löschen?')) return
+
     try {
-      await fetch(`/api/invitations?id=${invitationId}`, {
+      await fetch(`/api/knowledge/documents?id=${id}`, {
         method: 'DELETE',
       })
-      fetchData()
+      fetchDocuments()
     } catch (err) {
-      console.error('Revoke error:', err)
+      console.error('Delete error:', err)
+    }
+  }
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return
+
+    setSearching(true)
+    try {
+      const response = await fetch('/api/knowledge/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: searchQuery, limit: 5 }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setSearchResults(data.results)
+      }
+    } catch (err) {
+      console.error('Search error:', err)
+    } finally {
+      setSearching(false)
     }
   }
 
@@ -269,89 +301,85 @@ export default function DashboardTeamPage() {
           </header>
           <main className='size-full flex-1 px-4 py-6 sm:px-6'>
             <div className='mb-6'>
-              <h1 className='text-2xl font-bold'>Team verwalten</h1>
-              <p className='text-muted-foreground'>Team-Mitglieder einladen und verwalten</p>
+              <h1 className='text-2xl font-bold'>Wissensdatenbank</h1>
+              <p className='text-muted-foreground'>Dokumente für den KI-Support hochladen und verwalten</p>
             </div>
 
             <div className='grid gap-6 lg:grid-cols-2'>
-              {/* Einladung senden */}
+              {/* Upload */}
               <Card>
                 <CardHeader>
                   <CardTitle className='flex items-center gap-2'>
-                    <MailIcon className='size-5' />
-                    Neues Mitglied einladen
+                    <UploadIcon className='size-5' />
+                    Dokument hochladen
                   </CardTitle>
                   <CardDescription>
-                    Senden Sie eine Einladung an eine E-Mail-Adresse
+                    PDF, DOCX, TXT oder MD Dateien hochladen
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleInvite} className='space-y-4'>
-                    <div className='space-y-2'>
-                      <Label htmlFor='email'>E-Mail-Adresse</Label>
-                      <Input
-                        id='email'
-                        type='email'
-                        placeholder='email@beispiel.de'
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    {error && (
-                      <p className='text-sm text-red-500'>{error}</p>
+                  <input
+                    ref={fileInputRef}
+                    type='file'
+                    accept='.pdf,.docx,.txt,.md'
+                    onChange={handleUpload}
+                    className='hidden'
+                    id='file-upload'
+                  />
+                  <label
+                    htmlFor='file-upload'
+                    className={`flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2Icon className='size-8 text-muted-foreground animate-spin mb-2' />
+                        <span className='text-sm text-muted-foreground'>Wird verarbeitet...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadIcon className='size-8 text-muted-foreground mb-2' />
+                        <span className='text-sm text-muted-foreground'>Klicken zum Hochladen</span>
+                        <span className='text-xs text-muted-foreground mt-1'>PDF, DOCX, TXT, MD</span>
+                      </>
                     )}
-                    {success && (
-                      <p className='text-sm text-green-500'>{success}</p>
-                    )}
-                    <Button type='submit' disabled={sending} className='w-full'>
-                      {sending ? (
-                        <><Loader2Icon className='size-4 mr-2 animate-spin' />Senden...</>
-                      ) : (
-                        <><MailIcon className='size-4 mr-2' />Einladung senden</>
-                      )}
-                    </Button>
-                  </form>
+                  </label>
                 </CardContent>
               </Card>
 
-              {/* Ausstehende Einladungen */}
+              {/* Test-Suche */}
               <Card>
                 <CardHeader>
                   <CardTitle className='flex items-center gap-2'>
-                    <ClipboardListIcon className='size-5' />
-                    Ausstehende Einladungen
-                    {invitations.length > 0 && (
-                      <Badge variant='secondary'>{invitations.length}</Badge>
-                    )}
+                    <BotIcon className='size-5' />
+                    Wissensdatenbank testen
                   </CardTitle>
+                  <CardDescription>
+                    Testen Sie die semantische Suche
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <div className='flex items-center justify-center py-8'>
-                      <Loader2Icon className='size-6 animate-spin text-muted-foreground' />
-                    </div>
-                  ) : invitations.length === 0 ? (
-                    <p className='text-muted-foreground text-center py-4'>
-                      Keine ausstehenden Einladungen
-                    </p>
-                  ) : (
-                    <div className='space-y-3'>
-                      {invitations.map((inv) => (
-                        <div key={inv.id} className='flex items-center justify-between p-3 rounded-lg bg-muted/50'>
-                          <div>
-                            <p className='font-medium'>{inv.emailAddress}</p>
-                            <p className='text-xs text-muted-foreground'>
-                              Gesendet am {new Date(inv.createdAt).toLocaleDateString('de-DE')}
-                            </p>
+                <CardContent className='space-y-4'>
+                  <div className='flex gap-2'>
+                    <Input
+                      placeholder='Frage eingeben...'
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    />
+                    <Button onClick={handleSearch} disabled={searching}>
+                      {searching ? <Loader2Icon className='size-4 animate-spin' /> : <SendIcon className='size-4' />}
+                    </Button>
+                  </div>
+                  {searchResults.length > 0 && (
+                    <div className='space-y-2 max-h-48 overflow-y-auto'>
+                      {searchResults.map((result) => (
+                        <div key={result.id} className='p-3 rounded-lg bg-muted/50 text-sm'>
+                          <div className='flex items-center justify-between mb-1'>
+                            <span className='font-medium text-xs'>{result.documentFilename}</span>
+                            <Badge variant='outline' className='text-xs'>
+                              {(result.similarity * 100).toFixed(0)}%
+                            </Badge>
                           </div>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            onClick={() => handleRevokeInvitation(inv.id)}
-                          >
-                            <XCircleIcon className='size-4 text-red-500' />
-                          </Button>
+                          <p className='text-muted-foreground line-clamp-2'>{result.content}</p>
                         </div>
                       ))}
                     </div>
@@ -359,14 +387,14 @@ export default function DashboardTeamPage() {
                 </CardContent>
               </Card>
 
-              {/* Team-Mitglieder */}
+              {/* Dokumente */}
               <Card className='lg:col-span-2'>
                 <CardHeader>
                   <CardTitle className='flex items-center gap-2'>
-                    <UsersIcon className='size-5' />
-                    Team-Mitglieder
-                    {users.length > 0 && (
-                      <Badge variant='secondary'>{users.length}</Badge>
+                    <DatabaseIcon className='size-5' />
+                    Gespeicherte Dokumente
+                    {documents.length > 0 && (
+                      <Badge variant='secondary'>{documents.length}</Badge>
                     )}
                   </CardTitle>
                 </CardHeader>
@@ -375,33 +403,42 @@ export default function DashboardTeamPage() {
                     <div className='flex items-center justify-center py-8'>
                       <Loader2Icon className='size-6 animate-spin text-muted-foreground' />
                     </div>
-                  ) : users.length === 0 ? (
-                    <p className='text-muted-foreground text-center py-4'>
-                      Keine Team-Mitglieder gefunden
-                    </p>
+                  ) : documents.length === 0 ? (
+                    <div className='text-center py-8 text-muted-foreground'>
+                      <DatabaseIcon className='size-12 mx-auto mb-2 opacity-50' />
+                      <p>Keine Dokumente vorhanden</p>
+                      <p className='text-sm'>Laden Sie Dokumente hoch, um die Wissensdatenbank zu füllen</p>
+                    </div>
                   ) : (
-                    <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-                      {users.map((user) => (
-                        <div key={user.id} className='flex items-center gap-3 p-4 rounded-lg border'>
-                          <Avatar>
-                            <AvatarImage src={user.imageUrl} />
-                            <AvatarFallback>
-                              <UserIcon className='size-4' />
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className='flex-1 min-w-0'>
-                            <p className='font-medium truncate'>
-                              {user.firstName && user.lastName 
-                                ? `${user.firstName} ${user.lastName}`
-                                : user.email}
-                            </p>
-                            <p className='text-sm text-muted-foreground truncate'>
-                              {user.email}
-                            </p>
+                    <div className='space-y-2'>
+                      {documents.map((doc) => (
+                        <div key={doc.id} className='flex items-center justify-between p-4 rounded-lg border'>
+                          <div className='flex items-center gap-3'>
+                            <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-muted'>
+                              <FileTextIcon className='size-5 text-muted-foreground' />
+                            </div>
+                            <div>
+                              <p className='font-medium'>{doc.filename}</p>
+                              <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+                                <Badge variant='outline' className='text-xs'>{doc.fileType.toUpperCase()}</Badge>
+                                <span>{formatFileSize(doc.fileSize)}</span>
+                                <span>•</span>
+                                <span>{doc.chunksCount} Chunks</span>
+                                <span>•</span>
+                                <span>{new Date(doc.createdAt).toLocaleDateString('de-DE')}</span>
+                              </div>
+                            </div>
                           </div>
-                          <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                            {user.role === 'admin' ? 'Admin' : 'Mitglied'}
-                          </Badge>
+                          <div className='flex items-center gap-2'>
+                            <Button variant='ghost' size='icon' asChild>
+                              <a href={doc.fileUrl} target='_blank' rel='noopener noreferrer'>
+                                <ExternalLinkIcon className='size-4' />
+                              </a>
+                            </Button>
+                            <Button variant='ghost' size='icon' onClick={() => handleDelete(doc.id)}>
+                              <TrashIcon className='size-4 text-red-500' />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>

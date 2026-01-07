@@ -13,6 +13,7 @@ import {
   InboxIcon,
   SettingsIcon,
   UsersIcon,
+  DatabaseIcon,
   Loader2Icon,
   ClockIcon,
   CheckCircleIcon,
@@ -101,6 +102,7 @@ const menuItems: MenuItem[] = [
 ]
 
 const settingsItems: MenuItem[] = [
+  { icon: DatabaseIcon, label: 'Wissensdatenbank', href: '/dashboard/wissen' },
   { icon: UsersIcon, label: 'Team verwalten', href: '/dashboard/team' },
   { icon: SettingsIcon, label: 'Einstellungen', href: '/dashboard/einstellungen' }
 ]

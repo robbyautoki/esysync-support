@@ -1,6 +1,69 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getChatResponse } from '@/lib/openai'
+import openai from '@/lib/openai'
+
+// Cosine Similarity berechnen
+function cosineSimilarity(a: number[], b: number[]): number {
+  let dotProduct = 0
+  let normA = 0
+  let normB = 0
+  
+  for (let i = 0; i < a.length; i++) {
+    dotProduct += a[i] * b[i]
+    normA += a[i] * a[i]
+    normB += b[i] * b[i]
+  }
+  
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB))
+}
+
+// Wissensdatenbank durchsuchen
+async function searchKnowledge(query: string): Promise<string | null> {
+  try {
+    // Prüfen ob Chunks vorhanden sind
+    const chunksCount = await prisma.knowledgeChunk.count()
+    if (chunksCount === 0) return null
+
+    // Query embedden
+    const embeddingResponse = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: query,
+    })
+    const queryEmbedding = embeddingResponse.data[0].embedding
+
+    // Alle Chunks laden
+    const chunks = await prisma.knowledgeChunk.findMany({
+      include: {
+        document: {
+          select: { filename: true },
+        },
+      },
+    })
+
+    // Similarity berechnen und Top 3 finden
+    const results = chunks
+      .map(chunk => {
+        const chunkEmbedding = JSON.parse(chunk.embedding) as number[]
+        const similarity = cosineSimilarity(queryEmbedding, chunkEmbedding)
+        return { content: chunk.content, similarity, filename: chunk.document.filename }
+      })
+      .filter(r => r.similarity > 0.3) // Mindest-Ähnlichkeit
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 3)
+
+    if (results.length === 0) return null
+
+    const contextText = results
+      .map(r => `[Aus "${r.filename}"]: ${r.content}`)
+      .join('\n\n')
+
+    return `[WISSENSDATENBANK-KONTEXT - Nutze diese Informationen für deine Antwort wenn relevant:]\n${contextText}`
+  } catch (error) {
+    console.error('Knowledge search error:', error)
+    return null
+  }
+}
 
 // Funktion um Ticketnummer zu erkennen und Status abzufragen
 async function checkForTicketStatus(content: string): Promise<string | null> {
@@ -93,14 +156,19 @@ export async function POST(request: Request) {
       // Prüfen ob eine Ticketnummer enthalten ist
       const ticketStatus = await checkForTicketStatus(content)
       
+      // Wissensdatenbank durchsuchen
+      const knowledgeContext = await searchKnowledge(content)
+      
       // Nachrichten für OpenAI vorbereiten
       const chatHistory = session.messages.map((msg) => ({
         role: (msg.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
         content: msg.content,
       }))
       
-      // Content mit Ticket-Status erweitern falls vorhanden
-      const enrichedContent = ticketStatus ? `${content}\n\n${ticketStatus}` : content
+      // Content mit Ticket-Status und Wissensdatenbank-Kontext erweitern
+      let enrichedContent = content
+      if (ticketStatus) enrichedContent += `\n\n${ticketStatus}`
+      if (knowledgeContext) enrichedContent += `\n\n${knowledgeContext}`
       chatHistory.push({ role: 'user', content: enrichedContent })
 
       // AI-Antwort generieren

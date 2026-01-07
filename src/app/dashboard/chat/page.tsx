@@ -12,6 +12,7 @@ import {
   InboxIcon,
   SettingsIcon,
   UsersIcon,
+  DatabaseIcon,
   Loader2Icon,
   BellIcon,
   MessageCircleIcon,
@@ -85,6 +86,7 @@ type MenuItem = { icon: ComponentType; label: string } & (
 
 const menuItems: MenuItem[] = [{ icon: ChartColumnBigIcon, label: 'Dashboard', href: '/dashboard' }]
 const settingsItems: MenuItem[] = [
+  { icon: DatabaseIcon, label: 'Wissensdatenbank', href: '/dashboard/wissen' },
   { icon: UsersIcon, label: 'Team verwalten', href: '/dashboard/team' },
   { icon: SettingsIcon, label: 'Einstellungen', href: '/dashboard/einstellungen' }
 ]
