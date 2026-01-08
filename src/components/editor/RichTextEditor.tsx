@@ -30,6 +30,46 @@ interface RichTextEditorProps {
   placeholder?: string
 }
 
+// Word-HTML bereinigen und in sauberes HTML umwandeln
+function cleanWordHTML(html: string): string {
+  // MS Office spezifische Kommentare entfernen
+  let cleaned = html.replace(/<!--\[if[^\]]*\]>[\s\S]*?<!\[endif\]-->/gi, '')
+  cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '')
+  
+  // MS Office spezifische Tags entfernen
+  cleaned = cleaned.replace(/<o:p[^>]*>[\s\S]*?<\/o:p>/gi, '')
+  cleaned = cleaned.replace(/<w:[^>]*>[\s\S]*?<\/w:[^>]*>/gi, '')
+  cleaned = cleaned.replace(/<m:[^>]*>[\s\S]*?<\/m:[^>]*>/gi, '')
+  cleaned = cleaned.replace(/<!\[if[^\]]*\]>[\s\S]*?<!\[endif\]>/gi, '')
+  
+  // Style-Attribute bereinigen aber wichtige behalten
+  cleaned = cleaned.replace(/\s*mso-[^:;]+:[^;]+;?/gi, '')
+  cleaned = cleaned.replace(/\s*margin[^:;]*:[^;]+;?/gi, '')
+  cleaned = cleaned.replace(/\s*line-height[^:;]*:[^;]+;?/gi, '')
+  cleaned = cleaned.replace(/\s*tab-stops[^:;]*:[^;]+;?/gi, '')
+  
+  // Leere Style-Attribute entfernen
+  cleaned = cleaned.replace(/\s*style\s*=\s*["']\s*["']/gi, '')
+  
+  // Leere class-Attribute entfernen
+  cleaned = cleaned.replace(/\s*class\s*=\s*["'][^"']*Mso[^"']*["']/gi, '')
+  cleaned = cleaned.replace(/\s*class\s*=\s*["']\s*["']/gi, '')
+  
+  // Span ohne Attribute in Text umwandeln
+  cleaned = cleaned.replace(/<span\s*>([^<]*)<\/span>/gi, '$1')
+  
+  // Font-Tags in spans umwandeln oder entfernen
+  cleaned = cleaned.replace(/<\/?font[^>]*>/gi, '')
+  
+  // Mehrfache Leerzeichen und Zeilenumbrüche reduzieren
+  cleaned = cleaned.replace(/\s+/g, ' ')
+  
+  // Leere Paragraphen mit &nbsp; behalten (sind oft Absätze)
+  cleaned = cleaned.replace(/<p[^>]*>\s*&nbsp;\s*<\/p>/gi, '<p><br></p>')
+  
+  return cleaned.trim()
+}
+
 export function RichTextEditor({ content, onChange, placeholder = 'Schreiben Sie hier...' }: RichTextEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -59,6 +99,9 @@ export function RichTextEditor({ content, onChange, placeholder = 'Schreiben Sie
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[300px] px-4 py-3',
+      },
+      transformPastedHTML(html) {
+        return cleanWordHTML(html)
       },
     },
     onUpdate: ({ editor }) => {
