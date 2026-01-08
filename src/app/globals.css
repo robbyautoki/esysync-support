@@ -139,70 +139,225 @@
   }
 }
 
-/* Anleitungen - Custom Styles */
+/* ========================================
+   ANLEITUNGEN - Professionelles Styling
+   ======================================== */
+
+/* Lead-Paragraph - Einleitung */
 .prose .lead {
-  font-size: 1.125rem;
+  font-size: 1.2rem;
   color: var(--muted-foreground);
-  line-height: 1.75;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, var(--muted) 0%, transparent 100%);
+  border-left: 4px solid var(--primary);
+  border-radius: 0 0.75rem 0.75rem 0;
 }
 
+/* Überschriften - Klare Hierarchie */
+.prose h2 {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin-top: 3rem !important;
+  margin-bottom: 1.25rem !important;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border);
+  color: var(--foreground);
+}
+
+.prose h3 {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
+  color: var(--foreground);
+}
+
+/* Absätze - Mehr Luft */
+.prose p {
+  margin-top: 1.25rem !important;
+  margin-bottom: 1.25rem !important;
+  line-height: 1.8 !important;
+}
+
+/* Listen - Bessere Abstände */
+.prose ol,
+.prose ul {
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+  line-height: 1.7;
+}
+
+.prose li p {
+  margin: 0.5rem 0 !important;
+}
+
+/* Nummerierte Listen - Schönere Zahlen */
+.prose ol {
+  counter-reset: list-counter;
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose ol > li {
+  counter-increment: list-counter;
+  position: relative;
+  padding-left: 3rem;
+}
+
+.prose ol > li::before {
+  content: counter(list-counter);
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Code/Menüpfade - Hervorgehoben */
+.prose code {
+  background: var(--muted);
+  color: var(--foreground);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.9em;
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+
+.prose pre code {
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+/* Bilder - Professionell mit Schatten */
+.prose img {
+  border: 1px solid var(--border) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  margin: 2rem auto !important;
+  display: block;
+  max-width: 100%;
+}
+
+/* Fettgedruckte Texte */
+.prose strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Info-Box */
 .prose .info-box {
-  background-color: oklch(0.95 0.02 240);
-  border-left: 4px solid oklch(0.6 0.15 240);
-  padding: 1rem 1.25rem;
-  border-radius: 0.5rem;
-  margin: 1.5rem 0;
+  background: linear-gradient(135deg, oklch(0.96 0.02 240) 0%, oklch(0.98 0.01 240) 100%);
+  border: 1px solid oklch(0.85 0.05 240);
+  border-left: 4px solid oklch(0.55 0.2 240);
+  padding: 1.25rem 1.5rem;
+  border-radius: 0 0.75rem 0.75rem 0;
+  margin: 2rem 0;
+}
+
+.prose .info-box::before {
+  content: "💡";
+  margin-right: 0.5rem;
 }
 
 .prose .info-box strong {
-  color: oklch(0.4 0.15 240);
+  color: oklch(0.35 0.15 240);
 }
 
+/* Tipp-Box */
 .prose .tip-box {
-  background-color: oklch(0.95 0.03 145);
-  border-left: 4px solid oklch(0.55 0.15 145);
-  padding: 1rem 1.25rem;
-  border-radius: 0.5rem;
-  margin: 1.5rem 0;
+  background: linear-gradient(135deg, oklch(0.96 0.03 145) 0%, oklch(0.98 0.01 145) 100%);
+  border: 1px solid oklch(0.85 0.05 145);
+  border-left: 4px solid oklch(0.5 0.2 145);
+  padding: 1.25rem 1.5rem;
+  border-radius: 0 0.75rem 0.75rem 0;
+  margin: 2rem 0;
+}
+
+.prose .tip-box::before {
+  content: "✅";
+  margin-right: 0.5rem;
 }
 
 .prose .tip-box strong {
-  color: oklch(0.35 0.15 145);
+  color: oklch(0.3 0.15 145);
 }
 
+/* Warning-Box */
 .prose .warning-box {
-  background-color: oklch(0.95 0.04 60);
-  border-left: 4px solid oklch(0.7 0.15 60);
-  padding: 1rem 1.25rem;
-  border-radius: 0.5rem;
-  margin: 1.5rem 0;
+  background: linear-gradient(135deg, oklch(0.96 0.04 60) 0%, oklch(0.98 0.02 60) 100%);
+  border: 1px solid oklch(0.85 0.06 60);
+  border-left: 4px solid oklch(0.65 0.2 60);
+  padding: 1.25rem 1.5rem;
+  border-radius: 0 0.75rem 0.75rem 0;
+  margin: 2rem 0;
+}
+
+.prose .warning-box::before {
+  content: "⚠️";
+  margin-right: 0.5rem;
 }
 
 .prose .warning-box strong {
-  color: oklch(0.45 0.15 60);
+  color: oklch(0.4 0.15 60);
+}
+
+/* Dark Mode Anpassungen */
+.dark .prose .lead {
+  background: linear-gradient(135deg, var(--muted) 0%, transparent 100%);
+}
+
+.dark .prose h2 {
+  border-bottom-color: var(--border);
+}
+
+.dark .prose code {
+  background: var(--muted);
+  border-color: var(--border);
+}
+
+.dark .prose img {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
 .dark .prose .info-box {
-  background-color: oklch(0.25 0.02 240);
-}
-
-.dark .prose .tip-box {
-  background-color: oklch(0.25 0.03 145);
-}
-
-.dark .prose .warning-box {
-  background-color: oklch(0.25 0.04 60);
+  background: linear-gradient(135deg, oklch(0.22 0.02 240) 0%, oklch(0.2 0.01 240) 100%);
+  border-color: oklch(0.35 0.05 240);
 }
 
 .dark .prose .info-box strong {
-  color: oklch(0.7 0.12 240);
+  color: oklch(0.75 0.12 240);
+}
+
+.dark .prose .tip-box {
+  background: linear-gradient(135deg, oklch(0.22 0.03 145) 0%, oklch(0.2 0.01 145) 100%);
+  border-color: oklch(0.35 0.05 145);
 }
 
 .dark .prose .tip-box strong {
-  color: oklch(0.7 0.12 145);
+  color: oklch(0.75 0.12 145);
+}
+
+.dark .prose .warning-box {
+  background: linear-gradient(135deg, oklch(0.22 0.04 60) 0%, oklch(0.2 0.02 60) 100%);
+  border-color: oklch(0.35 0.06 60);
 }
 
 .dark .prose .warning-box strong {
