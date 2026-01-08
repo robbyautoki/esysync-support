@@ -6,7 +6,7 @@ function formatGuideContent(content: string, excerpt: string): string {
   let formatted = content
 
   // 0. Alten Lead entfernen falls vorhanden (für Re-Formatierung)
-  formatted = formatted.replace(/<p class="lead">.*?<\/p>\s*/gs, '')
+  formatted = formatted.replace(/<p class="lead">[\s\S]*?<\/p>\s*/g, '')
 
   // 1. Lead-Paragraph am Anfang hinzufügen
   formatted = `<p class="lead">${excerpt}</p>\n\n${formatted}`
