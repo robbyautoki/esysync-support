@@ -123,14 +123,9 @@ const HeroSection = () => {
             className='relative flex w-full items-center justify-center xl:col-span-2'
           >
             <img
-              src='https://cdn.shadcnstudio.com/ss-assets/blocks/marketing/hero/image-44.png'
+              src='/hero_section.jpeg'
               alt='Display Support'
-              className='size-127 object-cover transition-all duration-300 hover:scale-105 hover:-rotate-2 max-sm:size-100 dark:hidden'
-            />
-            <img
-              src='https://cdn.shadcnstudio.com/ss-assets/blocks/marketing/hero/image-44-dark.png'
-              alt='Display Support'
-              className='hidden size-127 object-cover transition-all duration-300 hover:scale-105 hover:-rotate-2 max-sm:size-100 dark:block'
+              className='size-127 object-cover transition-all duration-300 hover:scale-105 hover:-rotate-2 max-sm:size-100 rounded-2xl'
             />
           </MotionPreset>
         </div>
