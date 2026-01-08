@@ -34,6 +34,9 @@ function formatMessage(content: string) {
   })
 }
 
+// Ticketnummer-Pattern (SUP-YYYYMMDD-XXXX)
+const TICKET_PATTERN = /SUP-\d{8}-\d{4}/i
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -41,8 +44,17 @@ export default function ChatWidget() {
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState<'ai' | 'team' | 'closed'>('ai')
+  const [hasTicketNumber, setHasTicketNumber] = useState(false)
+  const [userMessageCount, setUserMessageCount] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Prüfe ob Ticketnummer in Nachrichten vorhanden ist und zähle User-Nachrichten
+  useEffect(() => {
+    const allText = messages.map(m => m.content).join(' ')
+    setHasTicketNumber(TICKET_PATTERN.test(allText))
+    setUserMessageCount(messages.filter(m => m.role === 'user').length)
+  }, [messages])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -282,8 +294,8 @@ export default function ChatWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Escalate Button */}
-          {status === 'ai' && messages.length > 1 && (
+          {/* Escalate Button - nur wenn Ticketnummer genannt und mind. 3 User-Nachrichten */}
+          {status === 'ai' && hasTicketNumber && userMessageCount >= 3 && (
             <div className="border-t px-4 py-2">
               <Button
                 variant="outline"
