@@ -138,3 +138,73 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Anleitungen - Custom Styles */
+.prose .lead {
+  font-size: 1.125rem;
+  color: var(--muted-foreground);
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.prose .info-box {
+  background-color: oklch(0.95 0.02 240);
+  border-left: 4px solid oklch(0.6 0.15 240);
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.prose .info-box strong {
+  color: oklch(0.4 0.15 240);
+}
+
+.prose .tip-box {
+  background-color: oklch(0.95 0.03 145);
+  border-left: 4px solid oklch(0.55 0.15 145);
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.prose .tip-box strong {
+  color: oklch(0.35 0.15 145);
+}
+
+.prose .warning-box {
+  background-color: oklch(0.95 0.04 60);
+  border-left: 4px solid oklch(0.7 0.15 60);
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.prose .warning-box strong {
+  color: oklch(0.45 0.15 60);
+}
+
+.dark .prose .info-box {
+  background-color: oklch(0.25 0.02 240);
+}
+
+.dark .prose .tip-box {
+  background-color: oklch(0.25 0.03 145);
+}
+
+.dark .prose .warning-box {
+  background-color: oklch(0.25 0.04 60);
+}
+
+.dark .prose .info-box strong {
+  color: oklch(0.7 0.12 240);
+}
+
+.dark .prose .tip-box strong {
+  color: oklch(0.7 0.12 145);
+}
+
+.dark .prose .warning-box strong {
+  color: oklch(0.8 0.12 60);
+}
