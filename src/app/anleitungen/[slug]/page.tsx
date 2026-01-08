@@ -164,14 +164,14 @@ export default function AnleitungDetailPage() {
           {/* Artikel */}
           <article>
             {/* Header */}
-            <header className='mb-8'>
-              <div className='flex items-center gap-2 mb-4'>
-                <Badge variant='secondary'>
-                  <FolderIcon className='size-3 mr-1' />
+            <header className='mb-6'>
+              <div className='flex items-center gap-3 mb-4'>
+                <Badge variant='secondary' className='text-xs'>
+                  <FolderIcon className='size-3 mr-1.5' />
                   {guide.category.name}
                 </Badge>
                 {guide.publishedAt && (
-                  <span className='flex items-center gap-1 text-sm text-muted-foreground'>
+                  <span className='flex items-center gap-1.5 text-xs text-muted-foreground'>
                     <CalendarIcon className='size-3' />
                     {new Date(guide.publishedAt).toLocaleDateString('de-DE', {
                       day: '2-digit',
@@ -181,13 +181,12 @@ export default function AnleitungDetailPage() {
                   </span>
                 )}
               </div>
-              <h1 className='text-3xl sm:text-4xl font-bold mb-4'>{guide.title}</h1>
-              <p className='text-lg text-muted-foreground'>{guide.excerpt}</p>
+              <h1 className='text-2xl sm:text-3xl font-bold'>{guide.title}</h1>
             </header>
 
             {/* Cover Image */}
             {guide.coverImage && (
-              <div className='mb-8 rounded-xl overflow-hidden'>
+              <div className='mb-8 rounded-xl overflow-hidden shadow-md'>
                 <img
                   src={guide.coverImage}
                   alt={guide.title}
@@ -197,14 +196,12 @@ export default function AnleitungDetailPage() {
             )}
 
             {/* Content */}
-            <Card>
-              <CardContent className='p-6 sm:p-8'>
-                <div
-                  className='prose prose-sm sm:prose-base max-w-none prose-headings:font-bold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-a:text-primary prose-img:rounded-lg'
-                  dangerouslySetInnerHTML={{ __html: guide.content }}
-                />
-              </CardContent>
-            </Card>
+            <div className='bg-background rounded-xl p-6 sm:p-8 shadow-sm border'>
+              <div
+                className='prose prose-lg max-w-none'
+                dangerouslySetInnerHTML={{ __html: guide.content }}
+              />
+            </div>
           </article>
 
           {/* Verwandte Anleitungen */}
