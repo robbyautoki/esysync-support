@@ -87,6 +87,7 @@ type MenuItem = { icon: ComponentType; label: string } & (
 const menuItems: MenuItem[] = [{ icon: ChartColumnBigIcon, label: 'Dashboard', href: '/dashboard' }]
 const settingsItems: MenuItem[] = [
   { icon: DatabaseIcon, label: 'Wissensdatenbank', href: '/dashboard/wissen' },
+  { icon: ClipboardListIcon, label: 'Support-Kategorien', href: '/dashboard/support-kategorien' },
   { icon: UsersIcon, label: 'Team verwalten', href: '/dashboard/team' },
   { icon: SettingsIcon, label: 'Einstellungen', href: '/dashboard/einstellungen' }
 ]
