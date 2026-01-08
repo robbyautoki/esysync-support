@@ -27,6 +27,7 @@ import type { NavigationSection } from '@/components/shadcn-studio/blocks/menu-n
 // Navigation-Daten (gleich wie Startseite)
 const navigationData: NavigationSection[] = [
   { title: 'Startseite', href: '/' },
+  { title: 'Anleitungen', href: '/anleitungen' },
   { title: 'Status', href: '/ticket-status' },
 ]
 

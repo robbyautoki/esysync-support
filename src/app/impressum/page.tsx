@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator'
 
 const navigationData: NavigationSection[] = [
   { title: 'Startseite', href: '/' },
+  { title: 'Anleitungen', href: '/anleitungen' },
   { title: 'Status', href: '/ticket-status' },
 ]
 
