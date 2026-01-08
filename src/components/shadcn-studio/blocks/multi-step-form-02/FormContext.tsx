@@ -1,49 +1,57 @@
 'use client'
 
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
-// Problem-Kategorien und Unterkategorien
-export const problemCategories = {
+// Types für API-Daten
+export interface SupportProblem {
+  id: string
+  key: string
+  label: string
+  description: string
+}
+
+export interface SupportCategory {
+  key: string
+  label: string
+  description: string
+  icon: string
+  problems: SupportProblem[]
+}
+
+// Fallback-Kategorien (falls API nicht erreichbar)
+const fallbackCategories: Record<string, { label: string; description: string; icon: string; problems: { id: string; label: string; description: string }[] }> = {
   hardware: {
     label: 'Hardware-Probleme',
     description: 'Physische Defekte am Display oder Hardwarekomponenten',
+    icon: 'monitor',
     problems: [
       { id: 'led-defect', label: 'Displaypanel hat defekte LED-Beleuchtung', description: 'LED-Hintergrundbeleuchtung funktioniert nicht ordnungsgemäß' },
       { id: 'bootloop', label: 'Display bleibt im Bootloop hängen (ESYSYNC Logo)', description: 'Display startet immer wieder neu und zeigt nur das ESYSYNC Logo' },
-      { id: 'flicker', label: 'Displaypanel flackert', description: 'Display zeigt Flackern oder unstabile Bilddarstellung' },
-      { id: '24v-conversion', label: 'Display soll auf 24 Volt umgerüstet werden', description: 'Umbau des Displays für 24V Betriebsspannung' },
-      { id: 'sim-error', label: 'Display zeigt Fehler: "Simkarte entfernen"', description: 'Fehlermeldung bezüglich der SIM-Karte' },
-      { id: 'auth-error', label: 'Display zeigt Fehler: "Android UI Authentication Error"', description: 'Android Authentifizierungsfehler wird angezeigt' },
-      { id: 'no-power-all', label: 'Alle Displays bekommen keinen Strom', description: 'Stromversorgungsproblem für mehrere Displays' },
-      { id: 'lines', label: 'Linien im Bild', description: 'Störende Linien oder Streifen' },
-      { id: 'black-screen', label: 'Bleibt schwarz', description: 'Display zeigt kein Bild an' },
-      { id: 'blonde-woman', label: 'Display startet die APP nicht, Blonde Frau', description: 'App startet nicht und zeigt stattdessen eine blonde Frau' },
-      { id: 'no-content', label: 'No Content Assigned', description: 'Display zeigt "No Content Assigned" Meldung' },
-      { id: 'homeapp-select', label: 'Display schwarz und Homeapp muss ausgewählt werden', description: 'Display ist schwarz und die Home-App muss manuell ausgewählt werden' },
-      { id: 'no-update', label: 'Display updatet nicht, hat keine Verbindung (rotes Ausrufezeichen)', description: 'Inhalt wird angezeigt, aber rotes Ausrufezeichen in der ESYSYNC APP' },
-      { id: 'panel-damage', label: 'Displaypanel hat einen Schaden (Sprung, Bruch, Anzeigeschaden)', description: 'Physische Schäden am Display-Panel wie Risse oder Brüche' },
-      { id: 'case-damage', label: 'Displaygehäuse beschädigt (Sturz, Bruch, sonstige Acrylbeschädigung)', description: 'Gehäuse ist beschädigt durch Sturz oder andere Einwirkungen' },
+      { id: 'panel-damage', label: 'Displaypanel hat einen Schaden', description: 'Physische Schäden am Display-Panel' },
     ],
   },
   software: {
     label: 'Software-Probleme',
     description: 'Bootloop, Apps, Android-Fehler und Systemprobleme',
+    icon: 'code',
     problems: [
-      { id: 'hang-restart', label: 'Hängt nach Neustart', description: 'Display reagiert nicht mehr' },
       { id: 'not-responding', label: 'Display reagiert nicht mehr', description: 'System friert ein oder reagiert nicht auf Eingaben' },
     ],
   },
   network: {
     label: 'Netzwerk-Probleme',
     description: 'Verbindungs-, Update- und Konnektivitätsprobleme',
+    icon: 'wifi',
     problems: [
-      { id: 'router-defect', label: 'Router ist defekt', description: 'Netzwerk-Router funktioniert nicht mehr' },
       { id: 'no-connection', label: 'Keine Verbindung', description: 'Signal wird nicht erkannt' },
     ],
   },
-} as const
+}
 
-export type CategoryType = keyof typeof problemCategories
+// Dynamische Kategorien (werden aus API geladen)
+export let problemCategories: Record<string, { label: string; description: string; icon: string; problems: { id: string; label: string; description: string }[] }> = fallbackCategories
+
+export type CategoryType = string
 
 // Versandoptionen
 export const shippingOptions = [
@@ -91,6 +99,8 @@ interface FormContextType {
   formData: FormData
   updateFormData: (updates: Partial<FormData>) => void
   resetForm: () => void
+  categories: Record<string, { label: string; description: string; icon: string; problems: { id: string; label: string; description: string }[] }>
+  categoriesLoading: boolean
 }
 
 const initialFormData: FormData = {
@@ -116,6 +126,44 @@ const FormContext = createContext<FormContextType | null>(null)
 
 export const FormProvider = ({ children }: { children: ReactNode }) => {
   const [formData, setFormData] = useState<FormData>(initialFormData)
+  const [categories, setCategories] = useState(fallbackCategories)
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('/api/support-categories')
+        const data = await res.json()
+        
+        if (data.success && data.categories.length > 0) {
+          // Konvertiere API-Daten ins benötigte Format
+          const cats: Record<string, { label: string; description: string; icon: string; problems: { id: string; label: string; description: string }[] }> = {}
+          
+          for (const cat of data.categories) {
+            cats[cat.key] = {
+              label: cat.label,
+              description: cat.description,
+              icon: cat.icon,
+              problems: cat.problems.map((p: { key: string; label: string; description: string }) => ({
+                id: p.key,
+                label: p.label,
+                description: p.description
+              }))
+            }
+          }
+          
+          setCategories(cats)
+          problemCategories = cats
+        }
+      } catch (error) {
+        console.error('Error loading support categories:', error)
+      } finally {
+        setCategoriesLoading(false)
+      }
+    }
+
+    fetchCategories()
+  }, [])
 
   const updateFormData = (updates: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...updates }))
@@ -126,7 +174,7 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <FormContext.Provider value={{ formData, updateFormData, resetForm }}>
+    <FormContext.Provider value={{ formData, updateFormData, resetForm, categories, categoriesLoading }}>
       {children}
     </FormContext.Provider>
   )

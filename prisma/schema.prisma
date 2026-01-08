@@ -162,3 +162,31 @@ model Settings {
   value     String   @db.Text
   updatedAt DateTime @updatedAt
 }
+
+// Support-Kategorien und Probleme (für das Support-Formular)
+model SupportCategory {
+  id          String           @id @default(cuid())
+  key         String           @unique // z.B. "hardware", "software", "network"
+  label       String // z.B. "Hardware-Probleme"
+  description String
+  icon        String           @default("monitor") // lucide icon name
+  order       Int              @default(0)
+  problems    SupportProblem[]
+  createdAt   DateTime         @default(now())
+
+  @@index([order])
+}
+
+model SupportProblem {
+  id          String          @id @default(cuid())
+  key         String          @unique // z.B. "led-defect"
+  label       String
+  description String
+  categoryId  String
+  category    SupportCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  order       Int             @default(0)
+  createdAt   DateTime        @default(now())
+
+  @@index([categoryId])
+  @@index([order])
+}

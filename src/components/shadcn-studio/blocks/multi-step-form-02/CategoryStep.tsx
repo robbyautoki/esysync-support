@@ -1,26 +1,38 @@
-import { ArrowRightIcon, MonitorIcon, CodeIcon, WifiIcon } from 'lucide-react'
+import { ArrowRightIcon, MonitorIcon, CodeIcon, WifiIcon, Loader2Icon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 import type { StepperType } from '@/components/shadcn-studio/blocks/multi-step-form-02/MultiStepForm'
-import { useFormData, problemCategories, type CategoryType } from '@/components/shadcn-studio/blocks/multi-step-form-02/FormContext'
+import { useFormData, type CategoryType } from '@/components/shadcn-studio/blocks/multi-step-form-02/FormContext'
 
-const categoryIcons = {
+const categoryIcons: Record<string, typeof MonitorIcon> = {
   hardware: MonitorIcon,
+  monitor: MonitorIcon,
   software: CodeIcon,
+  code: CodeIcon,
   network: WifiIcon,
+  wifi: WifiIcon,
 }
 
 const CategoryStep = ({ stepper }: { stepper: StepperType }) => {
-  const { formData, updateFormData } = useFormData()
+  const { formData, updateFormData, categories, categoriesLoading } = useFormData()
 
   const handleCategoryChange = (value: string) => {
     updateFormData({
       category: value as CategoryType,
       problemDetail: null // Reset problem detail when category changes
     })
+  }
+
+  if (categoriesLoading) {
+    return (
+      <CardContent className='col-span-5 flex flex-col items-center justify-center gap-4 p-6 md:col-span-3 min-h-[300px]'>
+        <Loader2Icon className='size-8 animate-spin text-muted-foreground' />
+        <p className='text-muted-foreground'>Lade Kategorien...</p>
+      </CardContent>
+    )
   }
 
   return (
@@ -35,8 +47,8 @@ const CategoryStep = ({ stepper }: { stepper: StepperType }) => {
         value={formData.category || ''}
         onValueChange={handleCategoryChange}
       >
-        {(Object.entries(problemCategories) as [CategoryType, typeof problemCategories[CategoryType]][]).map(([key, category]) => {
-          const Icon = categoryIcons[key]
+        {Object.entries(categories).map(([key, category]) => {
+          const Icon = categoryIcons[category.icon] || categoryIcons[key] || MonitorIcon
           return (
             <div
               key={key}

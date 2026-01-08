@@ -7,12 +7,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 
 import type { StepperType } from '@/components/shadcn-studio/blocks/multi-step-form-02/MultiStepForm'
-import { useFormData, problemCategories } from '@/components/shadcn-studio/blocks/multi-step-form-02/FormContext'
+import { useFormData } from '@/components/shadcn-studio/blocks/multi-step-form-02/FormContext'
 
 const ProblemDetailStep = ({ stepper }: { stepper: StepperType }) => {
-  const { formData, updateFormData } = useFormData()
+  const { formData, updateFormData, categories } = useFormData()
 
-  const selectedCategory = formData.category ? problemCategories[formData.category] : null
+  const selectedCategory = formData.category ? categories[formData.category] : null
   const problems = selectedCategory?.problems || []
 
   const handleProblemChange = (value: string) => {
