@@ -186,7 +186,6 @@
 .prose ul {
   margin-top: 1.5rem !important;
   margin-bottom: 1.5rem !important;
-  padding-left: 1.5rem;
 }
 
 .prose li {
@@ -197,6 +196,29 @@
 
 .prose li p {
   margin: 0.5rem 0 !important;
+}
+
+/* Ungeordnete Listen - Bullet Points */
+.prose ul {
+  list-style: disc !important;
+  padding-left: 1.75rem !important;
+}
+
+.prose ul > li {
+  padding-left: 0.5rem;
+}
+
+.prose ul > li::marker {
+  color: var(--primary);
+  font-size: 1.1em;
+}
+
+/* Verschachtelte Listen */
+.prose ul ul,
+.prose ol ul {
+  list-style: circle !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
 }
 
 /* Nummerierte Listen - Schönere Zahlen */
